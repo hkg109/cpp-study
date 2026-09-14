@@ -1,0 +1,96 @@
+---
+title: 조건에 따라 다르게 실행하기
+description: if와 else를 사용해 조건에 따라 프로그램의 실행 흐름을 나눕니다.
+week: 2
+order: 1
+duration: 40
+difficulty: Beginner
+tags: [C++, Condition, if]
+objectives:
+  - 조건식의 참과 거짓을 구분한다.
+  - if와 else를 이용해 분기한다.
+  - 대입 연산자와 비교 연산자의 차이를 설명한다.
+published: true
+---
+
+# 조건에 따라 다르게 실행하기
+
+점수에 따라 합격 여부를 표시하려면 조건에 따라 실행할 코드를 선택해야 합니다. 이번 샘플 강의는 `if`와 `else`를 소개합니다.
+
+## 1. if문의 구조
+
+`if`는 괄호 안의 조건이 참일 때 블록을 실행합니다.
+
+```cpp title="pass.cpp" showLineNumbers {7}
+#include <iostream>
+
+int main() {
+    int score = 0;
+    std::cin >> score;
+
+    if (score >= 60) {
+        std::cout << "Pass\n";
+    }
+    return 0;
+}
+```
+
+조건식의 결과가 거짓이면 블록을 건너뜁니다.
+
+## 2. else로 다른 경우 처리하기
+
+`else`는 앞의 `if` 조건이 거짓일 때 실행됩니다. 아래 코드는 앞 예제의 조건문 부분을 바꾼 것입니다.
+
+```cpp title="branch.cpp"
+if (score >= 60) {
+    std::cout << "Pass\n";
+} else {
+    std::cout << "Try again\n";
+}
+```
+
+### 여러 조건 연결하기
+
+```cpp title="grade.cpp"
+if (score >= 90) {
+    std::cout << "A\n";
+} else if (score >= 80) {
+    std::cout << "B\n";
+} else {
+    std::cout << "C\n";
+}
+```
+
+위에서부터 조건을 검사하며, 처음 참이 되는 가지 하나만 실행합니다. 점수가 95라면 `A`만 출력합니다.
+
+## 3. 자주 하는 실수
+
+<Callout type="warning">`=`는 값을 저장하는 대입 연산자이고, `==`는 두 값이 같은지 비교하는 연산자입니다. 조건식에서 혼동하지 않도록 주의하세요.</Callout>
+
+`if (score >= 60);`처럼 조건식 바로 뒤에 세미콜론을 붙이면 의도하지 않은 빈 문장이 조건문의 본문이 됩니다. 짧은 조건문에도 중괄호를 사용하는 습관이 도움이 됩니다.
+
+## 4. 연습문제
+
+정수 `number`가 짝수인지 홀수인지 출력해 보세요. 나머지 연산자 `%`를 사용합니다.
+
+<Answer>
+
+```cpp
+if (number % 2 == 0) {
+    std::cout << "Even\n";
+} else {
+    std::cout << "Odd\n";
+}
+```
+
+2로 나눈 나머지가 0이면 짝수입니다. 0과 음수도 함께 테스트해 보세요.
+
+</Answer>
+
+## 5. 핵심 정리
+
+- `if`는 참인 조건의 블록을 실행합니다.
+- `else`는 조건이 거짓인 경우를 처리합니다.
+- `else if`는 위에서부터 순서대로 검사합니다.
+- `=`와 `==`의 역할을 구분합니다.
+

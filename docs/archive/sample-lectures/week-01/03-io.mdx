@@ -1,0 +1,104 @@
+---
+title: 화면에 출력하고 입력받기
+description: cout과 cin으로 사용자와 대화하는 작은 프로그램을 만듭니다.
+week: 1
+order: 3
+duration: 40
+difficulty: Beginner
+tags: [C++, cout, cin]
+objectives:
+  - cout으로 문자열과 숫자를 출력한다.
+  - cin으로 정수 값을 입력받는다.
+  - 입력과 계산, 출력으로 프로그램을 구성한다.
+published: true
+---
+
+# 화면에 출력하고 입력받기
+
+프로그램은 값을 입력받고, 계산하고, 결과를 보여줍니다. 이번 샘플 강의에서는 입출력 스트림을 이용해 간단한 덧셈 프로그램을 작성합니다.
+
+## 1. cout으로 출력하기
+
+`std::cout`에 `<<` 연산자로 값을 전달하면 표준 출력에 표시됩니다. 여러 값을 이어서 출력할 수도 있습니다.
+
+```cpp title="output.cpp" showLineNumbers
+#include <iostream>
+
+int main() {
+    int score = 90;
+    std::cout << "점수: " << score << '\n';
+    return 0;
+}
+```
+
+`'\n'`은 줄바꿈 문자입니다. `std::endl`도 줄을 바꾸지만 출력 버퍼를 비우는 동작까지 수행합니다.
+
+## 2. cin으로 입력받기
+
+`std::cin`은 표준 입력에서 값을 읽습니다. 아래 프로그램은 정수를 입력받아 그 값에 1을 더해 출력합니다.
+
+```cpp title="input.cpp" showLineNumbers {6}
+#include <iostream>
+
+int main() {
+    int number = 0;
+    std::cout << "정수를 입력하세요: ";
+    std::cin >> number;
+    std::cout << number + 1 << '\n';
+    return 0;
+}
+```
+
+### 방향 기억하기
+
+| 표현 | 의미 |
+| --- | --- |
+| `std::cout << value` | 값을 출력 스트림으로 보냄 |
+| `std::cin >> value` | 입력 스트림에서 값을 읽어 변수에 저장 |
+
+<Callout type="warning">정수를 읽는 자리에 문자를 입력하면 입력이 실패할 수 있습니다. 이 입문 예제는 올바른 범위의 정수가 입력된다고 가정합니다. 입력 실패를 처리하는 방법은 보충 학습 주제입니다.</Callout>
+
+## 3. 두 수 더하기
+
+입력은 공백이나 줄바꿈으로 구분할 수 있습니다. `3 5`를 입력하면 두 정수 변수에 차례로 저장됩니다.
+
+```cpp title="sum.cpp" showLineNumbers {6,7}
+#include <iostream>
+
+int main() {
+    int a = 0;
+    int b = 0;
+    std::cin >> a >> b;
+    std::cout << a + b << '\n';
+    return 0;
+}
+```
+
+## 4. 자주 하는 실수
+
+- `cout`에는 `<<`, `cin`에는 `>>`를 사용합니다.
+- `"number"`를 출력하면 변수의 값이 아니라 글자 그대로 출력됩니다.
+- 입력 전에 변수를 선언하고, 변수의 자료형에 맞는 값을 입력합니다.
+
+## 5. 연습문제
+
+두 정수를 입력받아 곱을 출력해 보세요. 입력값이 `4 7`이면 출력은 `28`이어야 합니다.
+
+<Answer>
+
+덧셈 예제에서 출력할 식을 곱셈으로 바꾸면 됩니다.
+
+```cpp
+std::cout << a * b << '\n';
+```
+
+추가로 두 값의 차도 출력해 보세요. `a - b`와 `b - a`는 결과가 다를 수 있습니다.
+
+</Answer>
+
+## 6. 핵심 정리
+
+- `cout`은 출력, `cin`은 입력에 사용합니다.
+- 스트림 연산자를 이어서 여러 값을 처리할 수 있습니다.
+- 입력 → 계산 → 출력의 흐름으로 프로그램을 구성합니다.
+

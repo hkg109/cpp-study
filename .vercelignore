@@ -1,0 +1,8 @@
+.next
+node_modules
+docs/archive
+tests
+*.tsbuildinfo
+*.log
+coverage
+test-results
