@@ -1,6 +1,6 @@
 ---
-title: 참조와 배열, vector 실습
-description: 참조, 배열, 다차원 배열과 vector를 활용하는 다섯 문제입니다.
+title: '참조와 배열, vector 실습'
+description: ''
 week: 3
 order: 1
 published: true

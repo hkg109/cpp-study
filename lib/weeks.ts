@@ -27,7 +27,8 @@ export function readWeeks(files: { name: string; source: string }[] = generated,
     const position = `${week}/${order}`;
     if (seen.has(position)) throw new Error(`${name}: ${week}주차 ${order}번 강의 파일이 중복됩니다.`);
     seen.add(position);
-    const tree = parseMarkdown(source, "md");
+    const format = /<Answer(?:\s|>)/.test(source) ? "mdx" as const : "md" as const;
+    const tree = parseMarkdown(source, format);
     const weekKey = `week-${String(week).padStart(2, "0")}`;
     const key = hasExplicitOrder ? `${weekKey}-${String(order).padStart(2, "0")}` : weekKey;
     const title = resolvedTitles[key]?.trim()
@@ -37,6 +38,6 @@ export function readWeeks(files: { name: string; source: string }[] = generated,
         : `Week ${String(week).padStart(2, "0")} 강의노트`);
     const paragraph = tree.children.find(node => node.type === "paragraph");
     const description = paragraph ? toString(paragraph).replace(/\s+/g, " ").slice(0, 140) : `${week}주차 ${order}번 C++ 강의노트입니다.`;
-    return { title, description, week, order, published: true, slug: [key], path: `/lectures/${key}`, kind: "lectures" as const, content: source, format: "md" as const };
+    return { title, description, week, order, published: true, slug: [key], path: `/lectures/${key}`, kind: "lectures" as const, content: source, format };
   }).sort((a, b) => a.week - b.week || a.order - b.order);
 }

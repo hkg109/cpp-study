@@ -1,6 +1,6 @@
 ---
 title: 클래스와 객체지향 프로그래밍 실습
-description: 클래스 설계부터 상속과 다형성까지 연습하는 다섯 문제입니다.
+description: ''
 week: 5
 order: 1
 published: true

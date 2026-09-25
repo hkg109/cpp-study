@@ -1,6 +1,6 @@
 ---
 title: 포인터와 동적 메모리 실습
-description: 주소, 포인터, C 문자열과 동적 메모리를 적용하는 다섯 문제입니다.
+description: ''
 week: 4
 order: 1
 published: true

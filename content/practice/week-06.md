@@ -1,6 +1,6 @@
 ---
 title: 클래스 고급 기능과 예외 처리 실습
-description: static, friend, 연산자 오버로딩과 예외 처리를 연습하는 다섯 문제입니다.
+description: ''
 week: 6
 order: 1
 published: true

@@ -28,6 +28,11 @@ test("static production HTML includes MDX features, one H1, real TOC ids and no 
   assert.ok(example.includes("data-raw="));
   assert.ok(example.includes("number_sign.cpp"));
   assert.match(example, /<details class="answer">/);
+  const printableLecture = readFileSync(path.join(serverDir, "lectures/week-00.html"), "utf8");
+  assert.match(printableLecture, /class="document-print-button"/);
+  assert.match(printableLecture, /기본 PDF/);
+  assert.match(printableLecture, /다크 PDF/);
+  assert.match(printableLecture, /PDF로 저장/);
   const manifest = JSON.parse(readFileSync(".next/prerender-manifest.json", "utf8"));
   assert.equal(manifest.routes["/lectures/week-02/02-loop"], undefined);
   assert.equal(manifest.routes["/lectures/week-01/01-environment"], undefined);

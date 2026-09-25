@@ -43,6 +43,13 @@ test("plain Markdown keeps every body heading and ignores fenced headings", () =
   assert.deepEqual(getHeadings(source, "md").map(h => [h.text, h.level]), [["강의 제목", 2], ["소개", 3], ["함수", 2], ["함수 호출", 3], ["재귀", 2], ["기저 조건", 3]]);
 });
 
+test("lecture Markdown with an Answer toggle is rendered as trusted MDX", () => {
+  const source = "## 문제\n\n<Answer>\n\n~~~cpp\nint main() {}\n~~~\n\n</Answer>";
+  const [lecture] = readWeeks([{ name: "week-0-2.md", source }]);
+  assert.equal(lecture.format, "mdx");
+  assert.equal(lecture.path, "/lectures/week-00-02");
+});
+
 test("week titles are read fresh from disk on every request", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cpp-titles-test-"));
   const file = path.join(root, "titles.json");
