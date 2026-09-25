@@ -14,8 +14,8 @@ import { loadWeekFiles } from "../scripts/sync-weeks.mjs";
 
 test("published manifest hides drafts from routes, navigation and search", () => {
   const lectures = getAllLectures();
-  assert.deepEqual(lectures.map(doc => doc.week), lectures.map(doc => doc.week).sort((a, b) => a - b));
-  assert.ok(lectures.every(doc => doc.order === 1));
+  assert.deepEqual(lectures.map(doc => [doc.week, doc.order]), lectures.map(doc => [doc.week, doc.order]).sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+  assert.ok(lectures.every(doc => doc.order >= 1));
   assert.ok(lectures.every(doc => doc.published));
   assert.equal(getDocument("lectures", ["week-02", "02-loop"]), undefined);
   assert.equal(getDocument("lectures", ["..", "..", "package"]), undefined);
@@ -38,9 +38,9 @@ test("plain Markdown is discovered without frontmatter or a React edit", () => {
 });
 
 test("each practice Markdown file has five Korean levels and hidden example solutions", () => {
-  const practices = readCollection("practice").filter(doc => doc.week <= 2);
+  const practices = readCollection("practice").filter(doc => doc.week <= 6);
   const levels = ["중하", "중", "중상", "상", "최상"];
-  assert.deepEqual(practices.map(doc => doc.week), [0, 1, 2]);
+  assert.deepEqual(practices.map(doc => doc.week), [0, 1, 2, 3, 4, 5, 6]);
   for (const practice of practices) {
     assert.equal(practice.format, "mdx");
     assert.equal(getHeadings(practice.content, "mdx").filter(heading => /^Q\d+\./.test(heading.text)).length, 5);
@@ -67,7 +67,7 @@ test("duplicate route and order fail loudly", () => {
   try {
     const directory = path.join(root, "weeks");
     mkdirSync(directory, { recursive: true });
-    for (const name of ["week-1.md", "week-01.md"]) writeFileSync(path.join(directory, name), "# 중복 강의\n\n내용");
+    for (const name of ["week-1.md", "week-01-01.md"]) writeFileSync(path.join(directory, name), "# 중복 강의\n\n내용");
     assert.throws(() => readWeeks(loadWeekFiles(directory)), /중복/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -104,5 +104,6 @@ test("malformed or stale progress does not break the application", () => {
   assert.deepEqual(parseProgress("not json"), {});
   assert.deepEqual(parseProgress("[]"), {});
   assert.deepEqual(parseProgress('{"week-04":true}'), { "week-04": true });
+  assert.deepEqual(parseProgress('{"week-00-02":true}'), { "week-00-02": true });
   assert.deepEqual(parseProgress('{"week-01/01-environment":true,"week-01/02-test":"yes","__proto__":true}'), { "week-01/01-environment": true });
 });

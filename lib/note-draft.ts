@@ -13,7 +13,8 @@ function announceFileStatus(path: string, status: NoteFileStatus) {
 
 function queueFileSave(path: string, payload: { content: string } | { title: string } | { title: string; description: string }, timerKey = path) {
   const [kind, week] = path.split("/").filter(Boolean);
-  if (!week || !["lectures", "practice"].includes(kind) || !/^week-\d{2,3}$/.test(week)) { announceFileStatus(path, "error"); return; }
+  const validDocumentId = kind === "lectures" ? /^week-\d+(?:-\d+)?$/ : /^week-\d+$/;
+  if (!week || !["lectures", "practice"].includes(kind) || !validDocumentId.test(week)) { announceFileStatus(path, "error"); return; }
   const previous = saveTimers.get(timerKey);
   if (previous) clearTimeout(previous);
   announceFileStatus(path, "saving");

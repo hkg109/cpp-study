@@ -29,17 +29,18 @@ content/
 ├── weeks/
 │   ├── titles.json
 │   ├── week-00.md
+│   ├── week-00-02.md
 │   └── week-01.md
 └── practice/
     ├── week-00.md
     └── week-01.md
 ```
 
-- 강의 파일은 `content/weeks/week-00.md` 형식으로 추가합니다.
-- 강의 제목은 `content/weeks/titles.json`에서 별도로 관리합니다.
+- 각 주차의 첫 강의는 `content/weeks/week-00.md`, 추가 강의는 `week-00-02.md`, `week-00-03.md` 형식으로 추가합니다.
+- 강의 제목은 `content/weeks/titles.json`에서 파일명과 같은 키(`week-00`, `week-00-02`)로 별도 관리합니다.
 - 강의 Markdown 안의 제목은 본문과 오른쪽 목차에 그대로 표시됩니다.
 - 실습 파일은 `content/practice/week-00.md` 형식이며, 제목과 설명 등의 정보는 파일 상단 frontmatter에 둡니다.
-- 0주차부터 사용할 수 있고 주차 숫자순으로 자동 정렬됩니다.
+- 0주차부터 사용할 수 있고 주차와 강의 번호순으로 자동 정렬됩니다.
 - 파일 추가·수정·삭제는 개발 서버에서 자동 감지됩니다.
 - `lib/weeks.generated.json`은 빌드 전에 자동 생성되므로 직접 수정하지 않습니다.
 

@@ -8,7 +8,7 @@ export const weeksDirectory = path.join(project, "content/weeks");
 export function loadWeekFiles(directory) {
   if (!existsSync(directory)) return [];
   return readdirSync(directory, { withFileTypes: true })
-    .filter(entry => entry.isFile() && /^week-\d+\.md$/i.test(entry.name))
+    .filter(entry => entry.isFile() && /^week-\d+(?:-\d+)?\.md$/i.test(entry.name))
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(entry => ({ name: entry.name, source: readFileSync(path.join(directory, entry.name), "utf8") }));
 }

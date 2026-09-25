@@ -16,7 +16,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ wee
   }
 
   const { week } = await params;
-  if (!/^week-\d{2,3}$/.test(week)) {
+  if (!/^week-\d+(?:-\d+)?$/.test(week)) {
     return Response.json({ error: "올바르지 않은 강의 파일입니다." }, { status: 400 });
   }
 
@@ -26,6 +26,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ wee
 
   if (body.kind !== "lectures" && body.kind !== "practice") {
     return Response.json({ error: "수정할 수 없는 문서 종류입니다." }, { status: 400 });
+  }
+  if (body.kind === "practice" && !/^week-\d+$/.test(week)) {
+    return Response.json({ error: "올바르지 않은 실습 파일입니다." }, { status: 400 });
   }
   const weeksDirectory = path.resolve(process.cwd(), "content", "weeks");
   if (body.kind === "practice") {

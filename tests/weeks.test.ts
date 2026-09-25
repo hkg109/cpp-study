@@ -17,20 +17,24 @@ test("week manifest reflects additions, edits and deletions and sorts numericall
     fs.mkdirSync(directory);
     assert.deepEqual(readFixture(root), []);
     fs.writeFileSync(path.join(directory, "week-10.md"), "# 열 번째\n\n첫 내용");
+    fs.writeFileSync(path.join(directory, "week-10-02.md"), "# 열 번째의 두 번째\n\n둘째 내용");
     fs.writeFileSync(path.join(directory, "week-2.md"), "제목 없는 내용");
     syncWeeks(directory, output);
     assert.equal(syncWeeks(directory, output), false);
-    assert.deepEqual(readFixture(root).map(doc => doc.week), [2, 10]);
+    assert.deepEqual(readFixture(root).map(doc => [doc.week, doc.order]), [[2, 1], [10, 1], [10, 2]]);
     assert.equal(readFixture(root)[0].title, "Week 02 강의노트");
+    assert.equal(readFixture(root)[2].path, "/lectures/week-10-02");
+    assert.equal(readFixture(root)[2].title, "Week 10 · Lecture 02");
+    assert.equal(readWeeks([{ name: "week-3-2.md", source: "# 두 번째 강의" }], { "week-03-02": "별도 두 번째 제목" })[0].title, "별도 두 번째 제목");
     assert.equal(readWeeks([{ name: "week-3.md", source: "# 본문 제목" }], { "week-03": "별도 강의 제목" })[0].title, "별도 강의 제목");
     fs.writeFileSync(path.join(directory, "week-10.md"), "# 변경된 제목\n\n수정한 본문");
     assert.equal(syncWeeks(directory, output), true);
     assert.match(fs.readFileSync(output, "utf8"), /수정한 본문/);
     fs.unlinkSync(path.join(directory, "week-2.md"));
     syncWeeks(directory, output);
-    assert.equal(JSON.parse(fs.readFileSync(output, "utf8")).length, 1);
+    assert.equal(JSON.parse(fs.readFileSync(output, "utf8")).length, 2);
     fs.writeFileSync(path.join(directory, "week-0.md"), "# 시작 전 안내");
-    assert.deepEqual(readFixture(root).map(doc => doc.week), [0, 10]);
+    assert.deepEqual(readFixture(root).map(doc => [doc.week, doc.order]), [[0, 1], [10, 1], [10, 2]]);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
