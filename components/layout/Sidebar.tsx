@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, ChevronDown, Terminal } from "lucide-react";
+import { BookOpenText, Check, ChevronDown, Terminal } from "lucide-react";
 import type { LectureMeta } from "@/types/content";
 import { useProgress } from "@/components/lecture/ProgressProvider";
 import { useEffect, useState } from "react";
@@ -29,6 +29,7 @@ export function Sidebar({ lectures, onNavigate }: { lectures: LectureMeta[]; onN
       <div>{lectures.filter(lecture => lecture.week === week).map(lecture => <Link key={lecture.path} href={lecture.path} onClick={onNavigate} className={`side-link ${pathname === lecture.path ? "active" : ""}`} aria-current={pathname === lecture.path ? "page" : undefined}><span className="side-order">{String(lecture.order).padStart(2, "0")}</span><span>{editedTitles[lecture.path] ?? lecture.title}</span>{progress[lecture.slug.join("/")] && <Check size={14} aria-label="학습 완료" className="trailing" />}</Link>)}</div>
     </details>)}
     <div className="sidebar-section resources"><span className="nav-label">KEEP PRACTICING</span><Link href="/practice" onClick={onNavigate} className={`side-link ${pathname.startsWith("/practice") ? "active" : ""}`}><Terminal size={16} />실습 문제</Link></div>
+    <div className="sidebar-section"><Link href="/review" onClick={onNavigate} className={`side-link ${pathname === "/review" ? "active" : ""}`}><BookOpenText size={16} />복습 노트</Link></div>
     <div className="sidebar-note"><span className="small-logo">미남들과 함께하는 C++</span><p>정시템 최고 미남들과<br />재밌게 배웁니다</p><span>FORIF STUDY NOTES</span></div>
   </nav>;
 }

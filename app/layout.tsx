@@ -7,6 +7,7 @@ import "./globals.css";
 import { Providers } from "@/components/layout/Providers";
 import { AdminProvider } from "@/components/admin/AdminProvider";
 import { Header } from "@/components/layout/Header";
+import { AppShell } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { getAllLectures } from "@/lib/lectures";
 import { getSearchIndex } from "@/lib/search";
@@ -24,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const shell = <>
     <a href="#main-content" className="skip-link">본문으로 바로가기</a>
     <Header lectures={lectures} searchIndex={getSearchIndex()} />
-    <div className="app-shell"><aside className="desktop-sidebar"><Sidebar lectures={lectures} /></aside><main id="main-content" tabIndex={-1}>{children}</main></div>
+    <AppShell sidebar={<Sidebar lectures={lectures} />}>{children}</AppShell>
   </>;
   return <html lang="ko" suppressHydrationWarning><body><Providers>
     {process.env.NODE_ENV === "development" ? <AdminProvider expectedPassword="1009">{shell}</AdminProvider> : shell}

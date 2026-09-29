@@ -4,7 +4,7 @@ import rehypePrettyCode from "rehype-pretty-code";
 import { visit } from "unist-util-visit";
 import type { Root } from "hast";
 import { mdxComponents } from "@/components/mdx/mdx-components";
-import { getHeadings, remarkDocumentHeadings } from "./markdown";
+import { getHeadings, remarkDocumentHeadings, remarkStudySyntax } from "./markdown";
 
 function rehypeRawCode() {
   return (tree: Root) => {
@@ -35,7 +35,7 @@ export async function renderMDX(source: string, format: "md" | "mdx" = "mdx") {
       blockJS: true,
       mdxOptions: {
         format,
-        remarkPlugins: [remarkGfm, remarkDocumentHeadings],
+        remarkPlugins: [remarkGfm, remarkStudySyntax, remarkDocumentHeadings],
         rehypePlugins: [rehypeRawCode, [rehypePrettyCode, { theme: { light: "light-plus", dark: "dark-plus" }, keepBackground: false }], rehypeDefaultLightCodeColors],
       },
     },
