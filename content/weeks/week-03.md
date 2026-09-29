@@ -28,7 +28,8 @@ vector로 크기가 변하는 배열 다루기
 
 ## 참조 변수
 
-참조(reference)는 이미 존재하는 변수에 붙이는 **별명**입니다. 참조를 통해 값을 바꾸면 원본 변수도 함께 바뀝니다.
+> [!DEFINITION]
+> 참조(reference)는 이미 존재하는 변수에 붙이는 **별명**입니다. 참조를 통해 값을 바꾸면 원본 변수도 함께 바뀝니다.
 
 ```cpp
 #include <iostream>
@@ -77,7 +78,8 @@ int& ref = first;
 ref = second;
 ```
 
-마지막 줄은 `ref`를 `second`에 다시 연결하는 코드가 아닙니다. `second`의 값인 `20`을 `first`에 대입합니다.
+> [!CAUTION]
+> 마지막 줄은 `ref`를 `second`에 다시 연결하는 코드가 아닙니다. `second`의 값인 `20`을 `first`에 대입합니다.
 
 ```text
 실행 전: first = 10, second = 20
@@ -183,7 +185,8 @@ int main() {
 
 ## 배열 선언과 초기화
 
-배열(array)은 같은 자료형의 값을 정해진 개수만큼 연속해서 저장합니다.
+> [!DEFINITION]
+> 배열(array)은 같은 자료형의 값을 정해진 개수만큼 연속해서 저장합니다.
 
 ```cpp
 int scores[5];
@@ -231,7 +234,8 @@ int numbers[3] = {1, 2, 3};
 
 ## 배열 순회
 
-배열의 모든 요소를 차례로 처리하는 것을 순회라고 합니다.
+> [!DEFINITION]
+> 배열의 모든 요소를 차례로 처리하는 것을 순회라고 합니다.
 
 ### 인덱스를 사용하는 for문
 
@@ -418,7 +422,8 @@ void printBoard(const int board[][COLUMN_COUNT], int rowCount) {
 
 ## vector
 
-`vector`는 같은 자료형의 값을 연속해서 저장하지만, 일반 배열과 달리 실행 중에 크기를 바꿀 수 있습니다.
+> [!DEFINITION]
+> `vector`는 같은 자료형의 값을 연속해서 저장하지만, 일반 배열과 달리 실행 중에 크기를 바꿀 수 있습니다.
 
 ```cpp
 #include <iostream>
