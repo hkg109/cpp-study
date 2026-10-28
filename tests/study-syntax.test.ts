@@ -5,9 +5,9 @@ import { parseMarkdown, getHeadings } from "../lib/markdown";
 
 test("learning syntax supports callouts, colors, blanks, quizzes and cards", () => {
   const tree = parseMarkdown(
-    "## ==blue:포인터==\n\n==중요== {{주소}}\n\n> [!DEFINITION]\n> 정의입니다.\n\n> [!QUIZ]\n> 질문?\n\n<!-- separate -->\n\n> [!FLASHCARD]\n> Q: 질문\n> A: 답변", "md");
+    "## ==blue:포인터==\n\n==중요== {{주소}}\n\n> [!DEFINITION]\n> 정의입니다.\n\n> [!TRAP]\n> 함정입니다.\n\n> [!QUIZ]\n> 질문?\n\n<!-- separate -->\n\n> [!FLASHCARD]\n> Q: 질문\n> A: 답변", "md");
   const rendered = JSON.stringify(tree);
-  for (const feature of ["study-mark-blue", "study-mark-yellow", "study-blank", "study-callout-definition", "study-quiz", "study-flashcard", "data-card-result"]) assert.ok(rendered.includes(feature), feature);
+  for (const feature of ["study-mark-blue", "study-mark-yellow", "study-blank", "study-callout-definition", "study-callout-trap", "study-quiz", "study-flashcard", "data-card-result"]) assert.ok(rendered.includes(feature), feature);
   assert.equal(getHeadings("## ==blue:포인터==", "md")[0].text, "포인터");
 });
 

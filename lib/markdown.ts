@@ -13,6 +13,7 @@ const CALLOUTS = {
   DEFINITION: { type: "definition", label: "정의" },
   EXAM: { type: "exam", label: "시험 포인트" },
   CAUTION: { type: "caution", label: "주의" },
+  TRAP: { type: "trap", label: "오답 주의" },
   EXAMPLE: { type: "example", label: "예시" },
   ADVANCED: { type: "advanced", label: "심화" },
 } as const;
@@ -82,7 +83,7 @@ function transformCallouts(tree: Root) {
     if (first?.type !== "paragraph") return;
     const marker = first.children[0];
     if (marker?.type !== "text") return;
-    const match = /^\[!(DEFINITION|EXAM|CAUTION|EXAMPLE|ADVANCED)\](?:\s*\n?|\s+)/.exec(marker.value);
+    const match = /^\[!(DEFINITION|EXAM|CAUTION|TRAP|EXAMPLE|ADVANCED)\](?:\s*\n?|\s+)/.exec(marker.value);
     if (!match) return;
     const callout = CALLOUTS[match[1] as keyof typeof CALLOUTS];
     marker.value = marker.value.slice(match[0].length);

@@ -1,686 +1,469 @@
 # 포인터와 동적 메모리
 
-## 전체 학습 흐름
+## 학습 흐름
 
 ```text
-변수의 메모리 주소 확인
+주소 &와 포인터 선언 → 역참조 * → 포인터 대입 추적
         ↓
-포인터에 주소 저장
+const 포인터 4가지 → 포인터 매개변수 (값 / 포인터 / 참조 비교)
         ↓
-역참조로 원본 값 읽고 변경
+배열과 포인터 → 포인터 연산과 *p++ → C 문자열 함수
         ↓
-포인터를 함수와 배열에 활용
-        ↓
-C 문자열의 끝을 나타내는 널 문자 이해
-        ↓
-new와 delete로 동적 메모리 관리
+new / delete → 메모리 누수와 댕글링 포인터 → 이중 포인터
 ```
 
-| 개념 | 핵심 역할 |
-|---|---|
-| 주소 | 메모리에서 값이 저장된 위치 |
-| 포인터 | 주소를 저장하는 변수 |
-| 역참조 | 포인터가 가리키는 원본 값에 접근 |
-| 포인터 연산 | 연속된 배열 요소 사이를 이동 |
-| C 문자열 | 널 문자로 끝나는 `char` 배열 |
-| 동적 메모리 | 실행 중 필요한 만큼 직접 할당한 메모리 |
+> [!EXAM]
+> 기말 대비 **1회 수업** 범위입니다. 2025 기말 문제 1 a)가 이 강의의 포인터 출력 추적 문제입니다. 같은 문제의 b) `static int m`은 [강의 6 · static 멤버](/lectures/week-06)에서 다룹니다.
+>
+> 포인터 문제는 그림을 그리면 틀리지 않습니다. 변수마다 상자를 그리고, 포인터는 화살표로 표시한 뒤 한 줄씩 상자 값과 화살표를 갱신하세요.
 
 ---
 
-## 주소와 포인터
+## 1. 주소와 포인터
 
-> [!DEFINITION]
-> 프로그램의 변수는 메모리의 특정 위치에 저장됩니다. 주소 연산자 `&`를 사용하면 변수의 주소를 확인할 수 있습니다.
-
-```cpp
-#include <iostream>
-using namespace std;
-
-int main() {
-    int number = 42;
-
-    cout << number << '\n';
-    cout << &number << '\n';
-    return 0;
-}
-```
-
-주소 값은 실행할 때마다 달라질 수 있습니다.
-
-### 포인터 선언
-
-포인터(pointer)는 메모리 주소를 저장하는 변수입니다.
-
-```cpp
-int number = 42;
-int* pointer = &number;
-```
-
-```text
-pointer ── 주소 저장 ──▶ number
-                        42
-```
-
-포인터의 자료형은 가리키는 값의 자료형과 맞아야 합니다.
-
-```cpp
-int count = 10;
-double temperature = 21.5;
-
-int* countPointer = &count;
-double* temperaturePointer = &temperature;
-```
-
-### nullptr
-
-아무 객체도 가리키지 않는 포인터는 `nullptr`로 표현합니다.
-
-```cpp
-int* pointer = nullptr;
-```
-
-초기화하지 않은 포인터에는 알 수 없는 주소가 들어 있을 수 있으므로, 바로 연결할 대상이 없다면 `nullptr`로 초기화합니다.
-
-```cpp
-// int* unsafePointer;       // 위험: 알 수 없는 주소
-int* safePointer = nullptr;  // 안전한 초기 상태
-```
-
-포인터를 사용하기 전에 검사할 수 있습니다.
-
-```cpp
-if (pointer != nullptr) {
-    cout << *pointer << '\n';
-}
-```
-
----
-
-## 역참조
-
-> [!DEFINITION]
-> 포인터 앞에 역참조 연산자 `*`를 붙이면 포인터가 가리키는 원본 값에 접근합니다.
-
-```cpp
-int number = 42;
-int* pointer = &number;
-
-cout << *pointer << '\n';  // 42
-```
-
-역참조한 위치에 새 값을 대입하면 원본 변수가 바뀝니다.
-
-```cpp
-*pointer = 100;
-cout << number << '\n';  // 100
-```
-
-### 선언의 *와 표현식의 *
-
-```cpp
-int* pointer = &number;
-```
-
-선언에서 `*`는 `pointer`가 포인터 변수임을 나타냅니다.
-
-```cpp
-cout << *pointer;
-```
-
-표현식에서 `*`는 포인터가 가리키는 값을 읽는 역참조 연산자입니다.
-
-### nullptr 역참조 금지
-
-```cpp
-int* pointer = nullptr;
-// cout << *pointer;  // 잘못된 접근
-```
-
-> [!CAUTION]
-> 존재하지 않거나 유효하지 않은 주소를 역참조하면 프로그램이 비정상 종료될 수 있습니다.
-
----
-
-## 포인터와 const
-
-`const`의 위치에 따라 변경할 수 있는 대상이 달라집니다.
-
-### 가리키는 값을 변경할 수 없는 포인터
-
-```cpp
-int number = 10;
-const int* pointer = &number;
-
-cout << *pointer << '\n';
-// *pointer = 20;  // 오류
-```
-
-포인터가 다른 주소를 가리키는 것은 가능합니다.
-
-```cpp
-int other = 30;
-pointer = &other;
-```
-
-### 포인터 자체를 변경할 수 없는 경우
-
-```cpp
-int number = 10;
-int* const pointer = &number;
-
-*pointer = 20;  // 원본 값 변경 가능
-// pointer = &other;  // 오류: 저장된 주소 변경 불가
-```
-
-### 둘 다 변경할 수 없는 경우
-
-```cpp
-const int* const pointer = &number;
-```
-
-| 선언 | 원본 값 변경 | 가리키는 주소 변경 |
-|---|---:|---:|
-| `int* p` | 가능 | 가능 |
-| `const int* p` | 불가능 | 가능 |
-| `int* const p` | 가능 | 불가능 |
-| `const int* const p` | 불가능 | 불가능 |
-
----
-
-## 포인터 매개변수
-
-포인터를 함수에 전달하면 함수가 호출한 곳의 원본 값에 접근할 수 있습니다.
-
-```cpp
-#include <iostream>
-using namespace std;
-
-void addOne(int* number) {
-    if (number != nullptr) {
-        (*number)++;
-    }
-}
-
-int main() {
-    int value = 5;
-    addOne(&value);
-
-    cout << value << '\n';  // 6
-    return 0;
-}
-```
-
-호출할 때는 값이 아니라 주소를 전달합니다.
-
-```text
-addOne(&value)
-       └── value의 주소
-```
-
-### 두 값 교환하기
-
-```cpp
-void swapValues(int* first, int* second) {
-    if (first == nullptr || second == nullptr) {
-        return;
-    }
-
-    int temp = *first;
-    *first = *second;
-    *second = temp;
-}
-```
-
-```cpp
-int x = 3;
-int y = 7;
-swapValues(&x, &y);
-```
-
-### 참조 매개변수와 비교
-
-```cpp
-void byReference(int& value) {
-    value++;
-}
-
-void byPointer(int* value) {
-    if (value != nullptr) {
-        (*value)++;
-    }
-}
-```
-
-| 구분 | 참조 매개변수 | 포인터 매개변수 |
+| 기호 | 위치 | 뜻 |
 |---|---|---|
-| 호출 | `byReference(x)` | `byPointer(&x)` |
-| 빈 대상 | 표현하기 어려움 | `nullptr` 가능 |
-| 접근 | `value` | `*value` |
-| 일반적인 선택 | 대상이 반드시 존재함 | 대상이 없을 수도 있음 |
-
----
-
-## 배열과 포인터
-
-대부분의 표현식에서 배열 이름은 첫 번째 요소의 주소처럼 동작합니다.
+| `&x` | 식 | 변수 `x`의 주소 |
+| `int* p` | 선언 | `p`는 `int`의 주소를 저장하는 포인터 |
+| `*p` | 식 | `p`가 가리키는 곳의 값(역참조) |
+| `int& r` | 선언 | 참조(별명). 주소 연산자와 다른 의미 |
 
 ```cpp
-int numbers[4] = {10, 20, 30, 40};
-
-int* pointer = numbers;
-```
-
-다음 두 주소는 같습니다.
-
-```cpp
-cout << numbers << '\n';
-cout << &numbers[0] << '\n';
-```
-
-배열 인덱스 표현과 포인터 역참조 표현도 같은 요소를 나타냅니다.
-
-```cpp
-cout << numbers[2] << '\n';     // 30
-cout << *(numbers + 2) << '\n'; // 30
+int n = 42;
+int* p = &n;      // p는 n을 가리킴
+*p = 100;         // n = 100
 ```
 
 ```text
-numbers + 0 ─▶ numbers[0]
-numbers + 1 ─▶ numbers[1]
-numbers + 2 ─▶ numbers[2]
-numbers + 3 ─▶ numbers[3]
+p ──▶ [ n : 100 ]
 ```
 
-### 배열을 함수에 전달하기
+- 포인터 자료형은 가리킬 값의 자료형과 맞아야 합니다. `double* d = &n;`은 컴파일 오류입니다.
+- 아무것도 가리키지 않을 때는 `nullptr`로 초기화합니다. 초기화하지 않은 포인터나 `nullptr`을 역참조하면 UB(보통 비정상 종료)입니다.
+- `int* p = 5;`처럼 정수를 바로 넣는 것은 컴파일 오류입니다.
+
+> [!TRAP]
+> `int* p, q;`에서 `q`는 포인터가 아니라 그냥 `int`입니다. `*`는 변수 이름마다 붙습니다: `int *p, *q;`
+
+> [!QUIZ]
+> 다음 출력을 쓰시오.
+>
+> ```cpp
+> int a = 10, b = 20;
+> int* p = &a;
+> int* q = &b;
+> *p = *q + 5;
+> p = q;
+> *p = 7;
+> cout << a << ' ' << b << ' ' << *p << ' ' << *q << ' ' << (p == q);
+> ```
+
+> [!ANSWER]
+> ```text
+> 25 7 7 7 1
+> ```
+>
+> | 문장 | 의미 | a | b | p가 가리킴 |
+> |---|---|---:|---:|---|
+> | `*p = *q + 5` | `a = b + 5` | 25 | 20 | a |
+> | `p = q` | 주소 복사 (화살표 이동) | 25 | 20 | b |
+> | `*p = 7` | `b = 7` | 25 | 7 | b |
+>
+> `p = q`는 값이 아니라 주소를 복사합니다. 이후 `*p`와 `*q`는 같은 변수입니다.
+
+> [!QUIZ]
+> 다음 선언에서 (1) `p[0] == n`의 참·거짓, (2) `p = &k;`의 대입 가능 여부를 쓰고, (3) 배열 `arr`의 `arr[i]`를 포인터 연산으로 쓰시오.
+>
+> ```cpp
+> int n = 3;
+> int& k = n;
+> int* p = &n;
+> ```
+
+> [!ANSWER]
+> (1) 참. `p[0]`은 `*(p + 0)` = `*p` = `n`입니다. (2) 가능. `k`는 `n`의 별명이므로 `&k`는 `&n`과 같은 주소입니다. (3) `*(arr + i)`.
+
+---
+
+## 2. const와 포인터
+
+`const`가 `*`의 **왼쪽**에 있으면 가리키는 **값**을, **오른쪽**에 있으면 **포인터 자체**를 고정합니다.
+
+| 선언 | `*p = 5` (값 변경) | `p = &m` (가리키는 곳 변경) | 읽는 법 |
+|---|:---:|:---:|---|
+| `int* p` | O | O | |
+| `const int* p` (= `int const* p`) | X | O | 상수를 가리키는 포인터 |
+| `int* const p` | O | X | 상수 포인터 (초기화 필수) |
+| `const int* const p` | X | X | 둘 다 고정 |
 
 ```cpp
-void printArray(const int* values, int size) {
-    for (int i = 0; i < size; i++) {
-        cout << values[i] << ' ';
+const int c = 9;
+int* p4 = &c;          // 컴파일 오류: const 값을 바꿀 수 있는 포인터로 가리킬 수 없음
+const int* p5 = &c;    // OK
+```
+
+> [!EXAM]
+> 4가지 선언을 표로 직접 그릴 수 있어야 합니다. 헷갈리면 `*`에 세로줄을 긋고, `const`가 줄 왼쪽(값)에 있는지 오른쪽(포인터)에 있는지만 보세요.
+
+> [!QUIZ]
+> 컴파일 오류가 나는 줄을 모두 고르시오.
+>
+> ```cpp
+> int n = 1, m = 2;
+> const int* p1 = &n;
+> *p1 = 5;               // (1)
+> p1 = &m;               // (2)
+> int* const p2 = &n;
+> *p2 = 5;               // (3)
+> p2 = &m;               // (4)
+> const int* const p3 = &n;
+> *p3 = 5;               // (5)
+> p3 = &m;               // (6)
+> const int c = 9;
+> int* p4 = &c;          // (7)
+> const int* p5 = &c;    // (8)
+> ```
+
+> [!ANSWER]
+> 오류: (1), (4), (5), (6), (7).
+>
+> `const int*`는 값을, `int* const`는 주소를 바꿀 수 없습니다. `const int*`가 `n`처럼 const가 아닌 변수를 가리키는 것은 괜찮습니다(그 포인터로 바꿀 수 없을 뿐).
+
+---
+
+## 3. 포인터 매개변수: 값 / 포인터 / 참조
+
+```cpp
+void s1(int a, int b)   { int t = a; a = b; b = t; }        // 복사본 교환
+void s2(int* a, int* b) { int t = *a; *a = *b; *b = t; }    // 가리키는 값 교환
+void s3(int* a, int* b) { int* t = a; a = b; b = t; }       // 지역 포인터만 교환
+void s4(int& a, int& b) { int t = a; a = b; b = t; }        // 원본 교환
+```
+
+| 구분 | 포인터 매개변수 | 참조 매개변수 |
+|---|---|---|
+| 선언 | `void f(int* p)` | `void f(int& r)` |
+| 호출 | `f(&x)` | `f(x)` |
+| 안에서 사용 | `*p` | `r` |
+| "없음" 표현 | `nullptr` 가능 | 불가(반드시 대상이 있음) |
+| 다른 대상으로 바꾸기 | 가능 | 불가 |
+
+> [!QUIZ]
+> `int x = 1, y = 2;`에서 시작해 아래를 차례로 실행할 때 각 호출 뒤의 `x y`를 쓰시오.
+>
+> ```cpp
+> s1(x, y);   s2(&x, &y);   s3(&x, &y);   s4(x, y);
+> ```
+
+> [!ANSWER]
+> | 호출 | x y | 이유 |
+> |---|---|---|
+> | `s1(x, y)` | 1 2 | 값 복사본만 교환 |
+> | `s2(&x, &y)` | 2 1 | `*a`, `*b`로 원본 교환 |
+> | `s3(&x, &y)` | 2 1 | 포인터 변수(복사본)끼리만 교환, 값은 그대로 |
+> | `s4(x, y)` | 1 2 | 참조로 원본 교환 |
+>
+> `s3`이 함정입니다. 포인터도 값으로 전달되므로 함수 안에서 `a = b`를 해도 호출한 쪽에는 영향이 없습니다.
+
+포인터 매개변수로 여러 결과를 돌려줄 수 있습니다.
+
+```cpp
+void minmax(const int a[], int n, int* mn, int* mx) {
+    *mn = *mx = a[0];
+    for (int i = 1; i < n; i++) {
+        if (a[i] < *mn) *mn = a[i];
+        if (a[i] > *mx) *mx = a[i];
     }
-    cout << '\n';
 }
+
+int arr[4] = {4, -2, 9, 0};
+int lo, hi;
+minmax(arr, 4, &lo, &hi);     // lo = -2, hi = 9
 ```
-
-다음 선언은 함수 매개변수에서 같은 의미로 사용됩니다.
-
-```cpp
-void printArray(const int values[], int size);
-void printArray(const int* values, int size);
-```
-
-함수는 포인터만으로 배열의 크기를 알 수 없으므로 `size`를 함께 받아야 합니다.
 
 ---
 
-## 포인터 연산
+## 4. 배열과 포인터
 
-포인터에 정수를 더하거나 빼면 해당 자료형의 요소 단위로 이동합니다.
+배열 이름은 대부분의 식에서 첫 원소의 주소(`&a[0]`)로 바뀝니다.
 
-```cpp
-int numbers[4] = {10, 20, 30, 40};
-int* pointer = numbers;
-
-cout << *pointer << '\n';  // 10
-
-pointer++;
-cout << *pointer << '\n';  // 20
-
-pointer += 2;
-cout << *pointer << '\n';  // 40
+```text
+a[i]  ==  *(a + i)        &a[i]  ==  a + i        p[i]  ==  *(p + i)
 ```
 
-`pointer + 1`은 주소 값을 단순히 1바이트 증가시키는 것이 아니라, 다음 `int` 요소의 주소로 이동합니다.
+| 비교 | 배열 `int a[5]` | 포인터 `int* p = a` |
+|---|---|---|
+| `sizeof` | 20 (원소 5개 × 4바이트) | 8 (64비트 환경의 주소 크기) |
+| `a = p;`, `a++` | 컴파일 오류 (배열 이름은 대입·증가 불가) | `p++` 가능 |
+| 함수 매개변수 `int a[]` | 실제로는 `int* a`와 같음 | |
 
-### 포인터로 배열 순회하기
+함수는 포인터만 받으므로 배열 크기를 알 수 없습니다. 크기는 `n`처럼 따로 받아야 합니다.
 
-```cpp
-int numbers[4] = {10, 20, 30, 40};
+### 포인터 연산
 
-for (int* pointer = numbers; pointer < numbers + 4; pointer++) {
-    cout << *pointer << ' ';
-}
-```
-
-### 두 포인터의 차이
-
-같은 배열 안의 두 포인터를 빼면 두 요소 사이의 거리를 구할 수 있습니다.
+`p + 1`은 주소를 1바이트가 아니라 **원소 하나만큼**(`int`면 4바이트) 이동합니다. 같은 배열 안의 두 포인터를 빼면 원소 개수 차이가 나옵니다.
 
 ```cpp
-int numbers[5] = {10, 20, 30, 40, 50};
-int* first = &numbers[1];
-int* last = &numbers[4];
-
-cout << last - first << '\n';  // 3
+int a[5] = {10, 20, 30, 40, 50};
+int* first = &a[1];
+int* last = &a[4];
+cout << last - first << '\n';   // 3
 ```
 
-서로 다른 배열을 가리키는 포인터끼리 빼거나 비교하면 안 됩니다.
+> [!EXAM]
+> 2025 기말 문제 1 a) 유형입니다. 먼저 두 가지를 확인하세요.
+>
+> - `*s`는 `s[0]`이다.
+> - `*(p + k)`와 `p[k]`는 **같은 원소**다.
+>
+> 그러면 `*(p + k) = k + p[k];`는 "`p[k]`에 `k`를 더한다", 즉 `p`가 `s`를 가리킬 때 `s[k] += k`로 바뀌어 추적이 쉬워집니다. `p`가 `s + 1`처럼 중간을 가리키면 `p[k]`는 `s[k + 1]`입니다.
+
+> [!QUIZ]
+> 다음 출력을 쓰시오.
+>
+> ```cpp
+> int s[5] = {3, 1, 4, 1, 5};
+> int* p = s + 1;
+> for (int k = 0; k < 4; k++)
+>     *(p + k) = k + p[k];
+> cout << *s << ' ' << *p << ' ' << s[4] << ' ' << p[2];
+> ```
+
+> [!ANSWER]
+> ```text
+> 3 1 8 3
+> ```
+>
+> `p`가 `s[1]`을 가리키므로 `p[k]`는 `s[k + 1]`입니다. 반복문은 `s[k + 1] += k`와 같습니다.
+>
+> | k | 바뀌는 원소 | 결과 배열 |
+> |---:|---|---|
+> | 0 | `s[1] += 0` | 3 1 4 1 5 |
+> | 1 | `s[2] += 1` | 3 1 5 1 5 |
+> | 2 | `s[3] += 2` | 3 1 5 3 5 |
+> | 3 | `s[4] += 3` | 3 1 5 3 8 |
+>
+> `*s` = `s[0]` = 3, `*p` = `s[1]` = 1, `s[4]` = 8, `p[2]` = `s[3]` = 3. `s[0]`은 한 번도 바뀌지 않습니다.
+
+### `*p++`와 `(*p)++` (우선순위)
+
+후위 `++`가 단항 `*`보다 먼저 묶입니다.
+
+| 식 | 묶음 | 하는 일 | 식의 값 |
+|---|---|---|---|
+| `*p++` | `*(p++)` | 포인터를 다음 칸으로, 값은 이동 전 칸 | 이동 전 원소 |
+| `(*p)++` | — | 가리키는 값을 1 증가 | 증가 전 값 |
+| `*++p` | `*(++p)` | 포인터를 먼저 이동 | 이동 후 원소 |
+| `++*p` | `++(*p)` | 값을 먼저 증가 | 증가 후 값 |
+
+> [!TRAP]
+> `*p++ = 10;`은 **이동 전 칸**에 10을 넣고 포인터를 다음 칸으로 옮깁니다. 값을 1 올리려면 반드시 괄호를 써서 `(*p)++`라고 써야 합니다.
+
+> [!QUIZ]
+> 다음 출력을 쓰시오.
+>
+> ```cpp
+> int arr[] = {10, 20, 30, 40};
+> int* p = arr;
+> cout << *p++ << ' ';
+> cout << (*p)++ << ' ';
+> cout << *++p << ' ';
+> cout << ++*p << ' ';
+> cout << *(p + 1) << ' ' << p[-1] << ' ' << p - arr << '\n';
+> for (int v : arr) cout << v << ' ';
+> ```
+
+> [!ANSWER]
+> ```text
+> 10 20 30 31 40 21 2
+> 10 21 31 40
+> ```
+>
+> | 식 | 출력 | p 위치 | 배열 |
+> |---|---|---:|---|
+> | `*p++` | 10 | 1 | 10 20 30 40 |
+> | `(*p)++` | 20 | 1 | 10 21 30 40 |
+> | `*++p` | 30 | 2 | 10 21 30 40 |
+> | `++*p` | 31 | 2 | 10 21 31 40 |
+> | `*(p + 1)`, `p[-1]`, `p - arr` | 40, 21, 2 | 2 | 10 21 31 40 |
+
+> [!QUIZ]
+> `int a[5] = {1, 2, 3, 4, 5}; int* p = a;`일 때 출력과 오류를 판정하시오. (64비트 환경)
+>
+> ```cpp
+> cout << sizeof(a) << ' ' << sizeof(p) << ' ' << *(a + 2) << ' '
+>      << *(p + 4) << ' ' << (a + 2 == &a[2]) << '\n';
+> a = p;      // (가)
+> a++;        // (나)
+> p++;        // (다)
+> ```
+
+> [!ANSWER]
+> 출력: `20 8 3 5 1`
+>
+> (가)와 (나)는 컴파일 오류(배열 이름은 대입·증가할 수 없음), (다)는 정상입니다.
+
+2차원 배열도 메모리에 한 줄로 저장되므로 `int* p = &m[0][0];`이면 `*(p + i * 열수 + j)`가 `m[i][j]`입니다. `int m[2][3]`에서 `*(p + 4)`는 `m[1][1]`입니다.
 
 ---
 
-## C 문자열
+## 5. C 문자열과 `<cstring>`
 
-C 문자열은 마지막에 널 문자 `\0`이 들어 있는 `char` 배열입니다.
+C 문자열은 마지막에 널 문자 `'\0'`이 들어 있는 `char` 배열입니다.
 
 ```cpp
 char word[] = "Hello";
 ```
 
-메모리에는 다음과 같이 저장됩니다.
-
 ```text
 'H'  'e'  'l'  'l'  'o'  '\0'
 ```
 
-문자 수는 5개지만 널 문자를 포함한 배열 크기는 6입니다.
+문자 수는 5개지만 널 문자를 포함한 배열 크기는 6입니다(`sizeof(word)`는 6). `char word[5] = "Hello";`는 널 문자 자리가 없어 컴파일 오류입니다.
+
+포인터로 순회할 수도 있습니다.
 
 ```cpp
-cout << sizeof(word) << '\n';  // 6
+const char* s = "abc";
+while (*s) cout << *s++;      // '\0'(0)이면 거짓 → 종료. 출력: abc
 ```
 
-### 직접 초기화하기
+| 함수 | 역할 | 주의 |
+|---|---|---|
+| `strlen(s)` | `'\0'` 앞까지의 문자 수 | `sizeof`(배열 전체 크기)와 다름 |
+| `strcpy(dst, src)` | 복사 | `dst`가 충분히 커야 함 |
+| `strcat(dst, src)` | 뒤에 이어 붙이기 | `dst`가 충분히 커야 함 |
+| `strcmp(a, b)` | 같으면 0, `a`가 사전순으로 앞이면 음수, 뒤면 양수 | 대문자(65~)가 소문자(97~)보다 앞 |
+
+> [!TRAP]
+> - 문자열은 `==`로 비교하지 않습니다. `char` 배열끼리 `==`는 주소를 비교합니다. `strcmp(a, b) == 0`을 쓰세요.
+> - 문자 배열에 `name = "Kim";`처럼 대입할 수 없습니다(배열 대입 불가). `strcpy(name, "Kim");`을 씁니다. 빈 문자열은 `strcpy(name, "");` 또는 `name[0] = '\0';`.
+> - `cin >> name`은 공백 전까지만 읽습니다. 한 줄 전체는 `cin.getline(name, 크기)`.
+
+> [!QUIZ]
+> 다음 출력을 쓰시오.
+>
+> ```cpp
+> char a[20] = "Hello";
+> char b[] = "World";
+> cout << strlen(a) << ' ' << sizeof(a) << ' ' << sizeof(b) << ' ';
+> strcat(a, b);
+> cout << a << ' ' << strlen(a) << ' ';
+> cout << (strcmp("abc", "abd") < 0) << ' ' << strcmp("abc", "abc") << ' '
+>      << (strcmp("b", "a") > 0) << ' ' << (strcmp("Zoo", "apple") < 0) << '\n';
+> ```
+
+> [!ANSWER]
+> ```text
+> 5 20 6 HelloWorld 10 1 0 1 1
+> ```
+>
+> `"Zoo" < "apple"`인 이유: `'Z'`(90)가 `'a'`(97)보다 작기 때문입니다.
+
+---
+
+## 6. 동적 메모리: `new` / `delete`
 
 ```cpp
-char word[] = {'H', 'i', '\0'};
+int* one = new int(42);        // int 하나
+delete one;
+
+int n;
+cin >> n;
+int* arr = new int[n];         // 실행 중에 크기 결정
+arr[0] = 1;                    // 일반 배열처럼 사용
+delete[] arr;                  // 배열은 delete[]
+arr = nullptr;                 // 댕글링 방지
 ```
 
-널 문자가 없으면 `cout`이 문자열의 끝을 알 수 없습니다.
+| 할당 | 해제 | 짝이 틀리면 |
+|---|---|---|
+| `new T` | `delete p` | UB |
+| `new T[n]` | `delete[] p` | UB |
 
-```cpp
-char invalid[] = {'H', 'i'};  // C 문자열로 사용하기 위험함
-```
-
-### 문자열 입력
-
-공백이 없는 단어는 `cin`으로 입력할 수 있습니다.
-
-```cpp
-char name[20];
-cin >> name;
-```
-
-공백을 포함한 한 줄은 `cin.getline`을 사용합니다.
-
-```cpp
-char sentence[100];
-cin.getline(sentence, 100);
-```
-
-배열 크기를 넘는 입력을 받지 않도록 최대 길이를 지정해야 합니다.
-
-### cstring 함수
-
-`<cstring>`에는 C 문자열을 다루는 함수가 들어 있습니다.
-
-```cpp
-#include <cstring>
-```
-
-| 함수 | 역할 |
+| 문제 | 상황 |
 |---|---|
-| `strlen(text)` | 널 문자를 제외한 길이 |
-| `strcmp(a, b)` | 두 문자열 비교 |
-| `strcpy(destination, source)` | 문자열 복사 |
-| `strcat(destination, source)` | 문자열 이어 붙이기 |
+| 메모리 누수 | 해제하지 않은 채 주소를 잃음: `p = new int(1); p = new int(2);` |
+| 댕글링 포인터 | 해제한 뒤에도 그 주소를 사용: `delete p; *p = 3;` |
+| 이중 해제 | 같은 메모리를 두 번 `delete` (UB). `nullptr`에 대한 `delete`는 안전 |
+| 스택 변수 해제 | `int x; delete &x;` (UB). `new`로 받은 것만 해제 |
 
-```cpp
-char first[20] = "Hello";
-char second[] = "World";
+> [!QUIZ]
+> 다음 출력을 쓰고, 마지막에 필요한 문장을 쓰시오.
+>
+> ```cpp
+> int n = 4;
+> int* d = new int[n];
+> for (int i = 0; i < n; i++) d[i] = i * i;
+> int* e = d + 1;
+> e[1] = 100;
+> for (int i = 0; i < n; i++) cout << d[i] << ' ';
+> ```
 
-cout << strlen(first) << '\n';
-
-if (strcmp(first, second) == 0) {
-    cout << "같은 문자열\n";
-}
-```
-
-복사하거나 이어 붙일 때 목적지 배열의 크기가 충분해야 합니다. 일반적인 C++ 코드에서는 메모리를 더 안전하게 관리하는 `std::string`을 우선 사용합니다.
+> [!ANSWER]
+> 출력: `0 1 100 9`
+>
+> `e`는 `d[1]`을 가리키므로 `e[1]`은 `d[2]`입니다. 마지막에 `delete[] d;`가 필요합니다. `e`를 따로 해제하면 이중 해제가 됩니다.
 
 ---
 
-## 동적 메모리
+## 7. 이중 포인터
 
-지역 배열의 크기는 보통 컴파일할 때 정해집니다. 실행 중에 필요한 크기가 결정된다면 `new`로 메모리를 할당할 수 있습니다.
-
-### 값 하나 할당하기
+포인터도 변수이므로 주소가 있습니다. 포인터의 주소를 저장하는 포인터를 이중 포인터라고 합니다.
 
 ```cpp
-int* number = new int;
-*number = 42;
-
-cout << *number << '\n';
-
-delete number;
-number = nullptr;
+int x = 5;
+int* p = &x;
+int** pp = &p;    // 포인터의 주소
+**pp = 9;         // x = 9
 ```
 
-`new`로 할당한 메모리는 더 이상 필요하지 않을 때 반드시 `delete`로 해제합니다.
-
-### 초기값과 함께 할당하기
-
-```cpp
-int* number = new int(42);
+```text
+pp ──▶ [ p ] ──▶ [ x : 9 ]
 ```
 
-### 동적 배열 할당하기
-
-```cpp
-#include <iostream>
-using namespace std;
-
-int main() {
-    int size;
-    cin >> size;
-
-    if (size <= 0) {
-        return 0;
-    }
-
-    int* numbers = new int[size]{};
-
-    for (int i = 0; i < size; i++) {
-        cin >> numbers[i];
-    }
-
-    for (int i = 0; i < size; i++) {
-        cout << numbers[i] << ' ';
-    }
-
-    delete[] numbers;
-    numbers = nullptr;
-    return 0;
-}
-```
-
-배열로 할당했다면 반드시 `delete[]`로 해제해야 합니다.
-
-| 할당 | 해제 |
+| 식 | 뜻 |
 |---|---|
-| `new int` | `delete pointer` |
-| `new int[size]` | `delete[] pointer` |
+| `pp` | `p`의 주소 |
+| `*pp` | `p` 자체 (`x`의 주소) |
+| `**pp` | `x`의 값 |
 
-### 메모리 누수
+> [!QUIZ]
+> 다음 출력을 쓰시오.
+>
+> ```cpp
+> int x = 1, y = 2;
+> int* p = &x;
+> int** pp = &p;
+> **pp = 10;
+> *pp = &y;
+> **pp += 5;
+> cout << x << ' ' << y << ' ' << *p;
+> ```
 
-> [!CAUTION]
-> 할당한 메모리를 해제하지 않은 채 주소를 잃으면 메모리 누수가 발생합니다.
-
-```cpp
-int* pointer = new int(10);
-pointer = new int(20);  // 처음 할당한 주소를 잃어버림
-```
-
-올바르게 해제한 뒤 새로운 메모리를 할당해야 합니다.
-
-```cpp
-int* pointer = new int(10);
-delete pointer;
-
-pointer = new int(20);
-delete pointer;
-pointer = nullptr;
-```
-
-### 댕글링 포인터
-
-> [!DEFINITION]
-> 메모리를 해제한 뒤에도 그 주소를 저장하고 있는 포인터를 댕글링 포인터라고 합니다.
-
-```cpp
-int* pointer = new int(10);
-delete pointer;
-
-// cout << *pointer;  // 위험: 이미 해제된 메모리
-pointer = nullptr;
-```
-
-해제한 뒤 `nullptr`을 대입하면 실수로 다시 역참조할 가능성을 줄일 수 있습니다.
+> [!ANSWER]
+> ```text
+> 10 7 7
+> ```
+>
+> `**pp = 10`은 `x = 10`입니다. `*pp = &y`는 `p` 자체를 바꾸므로 이제 `p`가 `y`를 가리킵니다. 그 뒤 `**pp += 5`는 `y += 5`입니다.
 
 ---
 
-## vector와 스마트 포인터를 우선 고려하기
+## 8. vector와 스마트 포인터
 
-직접 `new[]`와 `delete[]`를 사용하는 대신 `vector`를 사용하면 메모리가 자동으로 관리됩니다.
-
-```cpp
-#include <iostream>
-#include <vector>
-using namespace std;
-
-int main() {
-    int size;
-    cin >> size;
-
-    vector<int> numbers(size);
-
-    for (int& number : numbers) {
-        cin >> number;
-    }
-
-    for (int number : numbers) {
-        cout << number << ' ';
-    }
-    return 0;
-}
-```
-
-객체 하나를 동적으로 관리해야 하는 현대 C++ 코드에서는 원시 포인터와 `new` 대신 스마트 포인터를 사용하기도 합니다.
-
-```cpp
-#include <memory>
-
-unique_ptr<int> number = make_unique<int>(42);
-cout << *number << '\n';
-```
-
-스마트 포인터는 소유권 단원에서 더 자세히 다룹니다. 이번 주에는 주소, 역참조, 동적 할당과 해제의 원리를 이해하는 것이 목표입니다.
-
----
-
-## 종합 예제: 동적 점수 목록
-
-```cpp
-#include <iostream>
-using namespace std;
-
-double calculateAverage(const int* scores, int size) {
-    if (scores == nullptr || size <= 0) {
-        return 0.0;
-    }
-
-    int sum = 0;
-    for (int i = 0; i < size; i++) {
-        sum += scores[i];
-    }
-
-    return static_cast<double>(sum) / size;
-}
-
-int main() {
-    int studentCount;
-    cin >> studentCount;
-
-    if (studentCount <= 0) {
-        cout << "학생 수가 올바르지 않습니다.\n";
-        return 0;
-    }
-
-    int* scores = new int[studentCount];
-
-    for (int i = 0; i < studentCount; i++) {
-        cin >> scores[i];
-    }
-
-    cout << "평균: " << calculateAverage(scores, studentCount) << '\n';
-
-    delete[] scores;
-    scores = nullptr;
-    return 0;
-}
-```
-
----
-
-## 자주 하는 실수
-
-### 초기화하지 않은 포인터 사용
-
-```cpp
-// int* pointer;
-// *pointer = 10;  // 위험
-```
-
-### nullptr 역참조
-
-```cpp
-int* pointer = nullptr;
-// cout << *pointer;  // 잘못된 접근
-```
-
-### 배열 범위를 벗어난 포인터 연산
-
-```cpp
-int numbers[3] = {1, 2, 3};
-int* pointer = numbers + 3;
-// cout << *pointer;  // 끝 다음 주소는 역참조할 수 없음
-```
-
-### new와 delete 형태를 맞추지 않음
-
-```cpp
-int* numbers = new int[10];
-// delete numbers;   // 잘못된 해제
-delete[] numbers;    // 올바른 해제
-```
-
-### 같은 메모리를 두 번 해제
-
-```cpp
-int* pointer = new int(10);
-delete pointer;
-pointer = nullptr;
-
-// delete pointer;는 nullptr에 대해서는 안전하지만,
-// 이전 주소를 다른 포인터로 다시 해제하면 안 됨
-```
-
-### C 문자열의 널 문자 공간을 빼먹음
-
-```cpp
-char word[5] = "Hello";  // 오류: 널 문자까지 6칸 필요
-char safeWord[6] = "Hello";
-```
+직접 `new[]`/`delete[]`를 쓰는 대신 `vector<int> v(n);`을 쓰면 메모리가 자동으로 해제됩니다. 객체 하나를 동적으로 관리할 때는 `unique_ptr<int> p = make_unique<int>(42);`처럼 스마트 포인터를 씁니다(`<memory>`).
 
 ---
 
 ## 핵심 정리
 
-- `&변수`는 변수의 주소를 구한다.
-- 포인터는 주소를 저장하며, `*포인터`로 원본 값에 접근한다.
-- 연결할 대상이 없는 포인터는 `nullptr`로 초기화한다.
-- 포인터 매개변수는 원본을 변경하거나 대상이 없음을 표현할 수 있다.
-- 배열 이름은 대부분 첫 요소의 주소처럼 사용된다.
-- 포인터 연산은 배열 범위 안에서만 사용해야 한다.
-- C 문자열은 널 문자 `\0`으로 끝나는 `char` 배열이다.
-- `new`와 `delete`, `new[]`와 `delete[]`는 반드시 짝을 맞춘다.
-- 직접 동적 메모리를 관리해야 하는 특별한 이유가 없다면 `vector`와 스마트 포인터를 우선 고려한다.
-
+- `&x`는 주소, `*p`는 가리키는 값. `p = q`는 주소 복사, `*p = *q`는 값 복사.
+- `const`가 `*` 왼쪽이면 값 고정, 오른쪽이면 포인터 고정.
+- 포인터도 값으로 전달된다. 함수 안에서 포인터 변수끼리 바꿔도 바깥은 그대로다.
+- `a[i] == *(a + i)`, `p[0] == *p`. 배열 이름은 대입·증가 불가, `sizeof`가 포인터와 다르다.
+- `*(p + k) = k + p[k];`는 `p[k] += k`. `p`가 어디를 가리키는지 먼저 확인한다.
+- `*p++`는 포인터 이동, `(*p)++`는 값 증가.
+- 문자열 비교는 `strcmp`, 복사는 `strcpy`, 길이는 `strlen`.
+- `new`↔`delete`, `new[]`↔`delete[]`. 해제 후 `nullptr`.
+- `*pp`는 포인터 자체, `**pp`는 최종 값.
