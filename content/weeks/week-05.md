@@ -1,52 +1,437 @@
 # 클래스와 객체지향 프로그래밍
 
-## 학습 흐름
+지금까지는 점수 목록과 처리 함수를 따로 만들었습니다. 이제 데이터와 그 데이터를 다루는 함수를 하나로 묶습니다. ‘점수는 0~100’ 같은 규칙을 객체가 스스로 지키게 만드는 것이 출발점입니다.
 
-```text
-클래스와 객체 → 접근 지정자 (public / protected / private)
-        ↓
-생성자 · 멤버 초기화 목록 · 소멸자 → 호출 순서
-        ↓
-복사 생성자와 얕은 / 깊은 복사 → const 멤버 함수
-        ↓
-상속 → 상속 종류별 접근 표 → 오버라이딩과 가리기
-        ↓
-virtual과 다형성 → 가상 소멸자 → 추상 클래스
-```
+## 수업 목표와 진행 순서
 
-> [!EXAM]
-> 기말 족보의 클래스 문제는 세 가지입니다. ① **접근 가능 여부 O/X 표**, ② **virtual 유무에 따른 출력**, ③ **조건에 맞는 클래스 작성**(char 배열 멤버, getter/setter, 기본 생성자, protected 상속). 이 단원의 예제는 이 셋에 맞춰져 있습니다.
+**먼저 알아둘 것:** 함수, 참조, 포인터입니다. [4주차](/lectures/week-04)의 ‘객체의 수명이 끝난 뒤 주소를 쓰면 안 된다’를 떠올리세요.
 
-| 기말 대비 수업 | 범위 | 2025 기말 | 2018~2023 기말 |
-|---|---|---|---|
-| 2회 · 클래스 기본과 작성 문제 | 1~5절, 8절 | 문제 2 | 문제 1~6 |
-| 3회 · 상속, virtual | 6~7절 | 문제 3 | 문제 7~9, 20 |
+- 클래스라는 자료형과 그 자료형으로 만든 객체를 구분합니다.
+- 생성자로 초기 상태를 만들고 공개 메서드로 상태를 바꿉니다.
+- 상속, 가상 함수, 오버라이딩을 실제 호출 결과로 구분합니다.
+
+**권장 70분:** 클래스·객체 15분 → 생성자·소멸자 10분 → 캡슐화 실습 20분 → 상속·가상 함수 20분 → 확인 5분. 시간이 짧으면 캡슐화까지 한 번, 상속 이후를 다음 시간에 진행하세요. 추상 클래스는 보충입니다.
+
+> [!EXAMPLE]
+> **발표 시작 질문:** 점수 변수에 150을 넣지 못하게 하려면 어디에서 막아야 할까요? 먼저 자유롭게 수정하는 객체를 보여 주고, 값을 바꾸는 입구를 메서드로 제한해 봅니다. 예제마다 클래스 정의가 다르므로 전체 프로그램은 각각 별도 파일로 실행합니다.
+
+## 이번에 연결할 개념
+
+~~~text
+클래스로 새로운 자료형 설계
+        ↓
+객체마다 속성과 상태 저장
+        ↓
+메서드로 객체의 행동 정의
+        ↓
+생성자와 소멸자로 생명 주기 관리
+        ↓
+캡슐화로 올바른 사용 방법 강제
+        ↓
+상속과 오버라이딩으로 기능 확장
+        ↓
+가상 함수로 다형성 구현
+~~~
+
+| 개념 | 핵심 역할 |
+|---|---|
+| 클래스 | 데이터와 기능을 하나의 자료형으로 묶음 |
+| 객체 | 클래스를 바탕으로 만들어진 실제 값 |
+| 캡슐화 | 내부 상태를 보호하고 공개된 기능으로만 접근 |
+| 생성자 | 객체가 만들어질 때 초기 상태를 설정 |
+| 소멸자 | 객체가 사라질 때 정리 작업을 수행 |
+| 상속 | 기존 클래스의 특성을 물려받아 확장 |
+| 다형성 | 같은 호출이 실제 객체에 따라 다르게 동작 |
 
 ---
 
-## 1. 클래스와 객체
+## 클래스와 객체
 
-```cpp
-class Student {               // 설계도 (새 자료형)
+> [!DEFINITION]
+> 클래스는 관련 있는 데이터와 함수를 하나로 묶어 만든 사용자 정의 자료형입니다. 클래스로 선언한 실제 변수를 객체라고 합니다.
+
+~~~cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Student {
 public:
-    int number;
-    char name[20];
+    string name;
+    int score;
 
-    void print() const {      // 멤버 함수(메서드)
-        cout << number << ' ' << name << '\n';
+    void introduce() {
+        cout << name << ": " << score << '\n';
     }
-};                            // 세미콜론 필수
+};
 
-Student s;                    // 객체
-s.number = 1;                 // 점 연산자로 멤버 접근
-Student* p = &s;
-p->print();                   // 포인터는 -> 사용 ((*p).print()와 같음)
-```
+int main() {
+    Student first;
+    first.name = "Jisuk";
+    first.score = 95;
+    first.introduce();
+    return 0;
+}
+~~~
 
-- `class`의 기본 접근은 **private**, `struct`의 기본 접근은 **public**입니다.
-- 멤버 함수는 같은 객체의 다른 멤버를 이름만으로 씁니다.
+Student는 설계도이고 first는 그 설계도로 만든 객체입니다. 점 연산자를 사용하면 객체의 멤버에 접근할 수 있습니다.
 
----
+클래스 정의의 마지막 `};`에는 세미콜론이 필요합니다. `first.introduce()`는 **first 객체의 데이터로** 함수를 실행한다는 뜻입니다. `Student`를 정의하기만 해서는 자기소개가 출력되지 않습니다.
+
+## 속성과 메서드
+
+> [!DEFINITION]
+> 클래스 안의 변수는 속성 또는 데이터 멤버라고 부릅니다. 클래스 안의 함수는 메서드 또는 멤버 함수라고 부릅니다.
+
+~~~cpp
+class Rectangle {
+public:
+    int width;
+    int height;
+
+    int area() {
+        return width * height;
+    }
+
+    bool isSquare() {
+        return width == height;
+    }
+};
+~~~
+
+메서드는 자신을 호출한 객체의 속성을 바로 사용할 수 있습니다.
+
+~~~cpp
+Rectangle shape;
+shape.width = 5;
+shape.height = 3;
+cout << shape.area() << '\n';
+~~~
+
+객체마다 속성은 따로 저장됩니다. 한 객체의 width를 바꿔도 다른 객체의 width는 바뀌지 않습니다.
+
+예를 들어 `Rectangle first{5, 3}; Rectangle second{2, 2};`를 만든 뒤 `first.width = 10;`으로 바꿔도 `second.width`는 2입니다. `first.area()`는 30, `second.area()`는 4가 됩니다. **자료형은 같아도 상태는 객체마다 따로**입니다.
+
+## 생성자와 소멸자
+
+> [!DEFINITION]
+> 생성자는 객체가 만들어질 때 자동으로 호출됩니다. 클래스 이름과 같고 반환 자료형을 쓰지 않습니다.
+
+~~~cpp
+class Player {
+private:
+    string name;
+    int health;
+
+public:
+    Player(string playerName, int initialHealth)
+        : name(playerName), health(initialHealth) {
+    }
+
+    void show() const {
+        cout << name << ' ' << health << '\n';
+    }
+};
+~~~
+
+콜론 뒤의 멤버 초기화 목록은 멤버가 생성되는 순간 값을 설정합니다.
+
+`name(playerName)`은 멤버 `name`의 초기값을 매개변수 `playerName`으로 정한다는 뜻입니다. 생성자에는 `void`도 붙이지 않습니다. 생성자는 반환값을 받아 쓰는 일반 함수와 달리 객체의 시작 상태를 준비합니다.
+
+~~~cpp
+Player player("Knight", 100);
+~~~
+
+### 생성자 오버로딩
+
+매개변수 구성이 다르면 생성자를 여러 개 만들 수 있습니다.
+
+~~~cpp
+class Point {
+private:
+    int x;
+    int y;
+
+public:
+    Point() : x(0), y(0) {
+    }
+
+    Point(int xValue, int yValue) : x(xValue), y(yValue) {
+    }
+};
+~~~
+
+### 소멸자
+
+> [!DEFINITION]
+> 소멸자는 객체의 수명이 끝날 때 자동으로 호출됩니다. 클래스 이름 앞에 물결표를 붙이고 매개변수와 반환값을 사용하지 않습니다.
+
+~~~cpp
+class Trace {
+public:
+    Trace() {
+        cout << "객체 생성\n";
+    }
+
+    ~Trace() {
+        cout << "객체 소멸\n";
+    }
+};
+~~~
+
+지역 객체는 자신이 선언된 블록을 벗어날 때 소멸합니다. 직접 관리하는 동적 메모리나 파일 같은 자원이 있다면 소멸자에서 정리할 수 있습니다.
+
+~~~cpp
+int main() {
+    cout << "Before\n";
+    {
+        Trace object;
+        cout << "Inside\n";
+    }
+    cout << "After\n";
+}
+~~~
+
+출력 순서는 `Before → 객체 생성 → Inside → 객체 소멸 → After`입니다. 지역 객체에는 직접 소멸자를 호출하지 않습니다. `string`과 `vector` 멤버도 자기 소멸자가 자동으로 정리하므로 모든 클래스에 별도 정리 코드를 쓸 필요는 없습니다.
+
+## 캡슐화
+
+> [!DEFINITION]
+> 캡슐화는 객체의 내부 상태를 숨기고, 클래스가 허용한 방법으로만 값을 읽거나 바꾸게 만드는 원칙입니다.
+
+~~~cpp
+class Score {
+private:
+    int value;
+
+public:
+    Score(int initialValue) : value(0) {
+        setValue(initialValue);
+    }
+
+    bool setValue(int newValue) {
+        if (newValue < 0 || newValue > 100) {
+            return false;
+        }
+        value = newValue;
+        return true;
+    }
+
+    int getValue() const {
+        return value;
+    }
+};
+~~~
+
+private 멤버는 클래스 밖에서 직접 접근할 수 없습니다. public 메서드가 잘못된 값을 차단하므로 객체가 항상 유효한 상태를 유지하기 쉬워집니다.
+
+위 생성자는 먼저 0으로 초기화한 뒤 같은 검사 함수를 사용합니다. 초기값이 범위 밖이면 0을 유지하도록 정한 예제입니다. `private` 자체가 0~100을 검사하는 것은 아닙니다. **값을 검사하는 `setValue`와 직접 접근을 막는 `private`가 함께** 규칙을 지킵니다.
+
+~~~cpp
+Score score(80);
+cout << boolalpha << score.setValue(95) << '\n';  // true
+cout << score.setValue(150) << '\n';             // false
+cout << score.getValue() << '\n';                // 95
+// score.value = 150;  // 컴파일 오류: private 멤버
+~~~
+
+| 호출 | 결과 | 저장된 점수 |
+| --- | --- | --- |
+| `Score score(80)` | 초기 상태 설정 | 80 |
+| `setValue(95)` | 허용, true 반환 | 95 |
+| `setValue(150)` | 거부, false 반환 | 이전 값 95 유지 |
+
+### const 멤버 함수
+
+객체의 상태를 바꾸지 않는 메서드 뒤에는 const를 붙일 수 있습니다.
+
+~~~cpp
+int getValue() const {
+    return value;
+}
+~~~
+
+const 객체는 const 멤버 함수만 호출할 수 있습니다.
+
+## 함께 풀기: 잘못된 점수에서 상태 지키기
+
+위 `Score` 클래스 위에 `#include <iostream>`과 `using namespace std;`를 두고, 아래 `main`을 붙여 하나의 프로그램으로 실행하세요.
+
+~~~cpp
+int main() {
+    Score first(80);
+    Score second(40);
+    first.setValue(95);
+    bool accepted = first.setValue(150);
+    cout << boolalpha << accepted << '\n';
+    cout << first.getValue() << ' ' << second.getValue() << '\n';
+    return 0;
+}
+~~~
+
+출력은 `false`와 `95 40`입니다. first의 잘못된 수정이 거절되고 second의 상태도 그대로입니다. 초기값을 -1로 주면 이 예제의 규칙에 따라 0으로 시작합니다. 0과 100은 허용되고 -1과 101은 거절되는지도 확인해 보세요.
+
+**여기서 잠깐:** 클래스 이름·객체 두 개·생성자·읽는 메서드·바꾸는 메서드를 각각 짚을 수 있으면 상속으로 넘어갑니다. 상태를 보호하는 클래스를 만드는 데 상속이 꼭 필요한 것은 아닙니다.
+
+## 상속
+
+> [!DEFINITION]
+> 상속은 기존 클래스의 멤버를 바탕으로 새로운 클래스를 만드는 기능입니다.
+
+~~~cpp
+class Animal {
+protected:
+    string name;
+
+public:
+    Animal(string name) : name(name) {
+    }
+
+    void eat() const {
+        cout << name << " eats\n";
+    }
+};
+
+class Dog : public Animal {
+public:
+    Dog(string name) : Animal(name) {
+    }
+
+    void wagTail() const {
+        cout << name << " wags its tail\n";
+    }
+};
+~~~
+
+Animal은 기반 클래스, Dog는 파생 클래스입니다. public 상속에서는 기반 클래스의 public 기능이 파생 클래스에서도 public으로 유지됩니다.
+
+`Dog`는 `Animal`의 한 종류라는 관계입니다. `Dog dog("Coco"); dog.eat(); dog.wagTail();`를 실행하면 물려받은 기능과 새 기능을 모두 사용할 수 있습니다. `protected`는 클래스 내부와 파생 클래스에서 접근할 수 있고, 기반 클래스의 `private` 멤버를 파생 클래스가 직접 읽을 수는 없습니다.
+
+생성할 때는 기반 클래스 생성자가 먼저 호출되고 파생 클래스 생성자가 나중에 호출됩니다. 소멸할 때는 반대 순서입니다.
+
+## 오버라이딩
+
+> [!DEFINITION]
+> 오버라이딩은 파생 클래스가 기반 클래스의 **가상 함수**를 같은 호출 형태에 맞춰 다시 구현하는 것입니다. `override`를 붙여 의도와 실제 선언이 맞는지 컴파일러에게 검사받습니다.
+
+~~~cpp
+class Animal {
+public:
+    virtual void speak() const {
+        cout << "Animal sound\n";
+    }
+    virtual ~Animal() = default;
+};
+
+class Dog : public Animal {
+public:
+    void speak() const override {
+        cout << "Woof\n";
+    }
+};
+~~~
+
+여기서는 `Animal& animal = dog; animal.speak();`로 호출해도 Dog의 `Woof`가 출력됩니다. 기반의 `virtual`이 실제 객체에 맞는 함수를 고르게 합니다. 비가상 함수를 파생 클래스에서 같은 이름으로 선언하는 것은 이와 같은 오버라이딩이 아니라 이름을 가리는 동작이므로 구분하세요.
+
+## 다형성과 가상 함수
+
+> [!DEFINITION]
+> 다형성은 하나의 기반 클래스 인터페이스로 여러 파생 객체를 다루면서 각 객체에 맞는 동작을 실행하는 성질입니다.
+
+~~~cpp
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Animal {
+public:
+    virtual void speak() const {
+        cout << "Animal sound\n";
+    }
+
+    virtual ~Animal() = default;
+};
+
+class Dog : public Animal {
+public:
+    void speak() const override {
+        cout << "Woof\n";
+    }
+};
+
+class Cat : public Animal {
+public:
+    void speak() const override {
+        cout << "Meow\n";
+    }
+};
+
+int main() {
+    Dog dog;
+    Cat cat;
+    vector<Animal*> animals = {&dog, &cat};
+
+    for (Animal* animal : animals) {
+        animal->speak();
+    }
+    return 0;
+}
+~~~
+
+virtual이 붙은 함수를 기반 클래스 포인터나 참조로 호출하면 실제 객체의 오버라이딩 함수가 선택됩니다. override는 오버라이딩 의도를 컴파일러가 검사하게 합니다.
+
+출력은 순서대로 `Woof`, `Meow`입니다. `animals`에는 객체 복사본이 아니라 기존 `dog`, `cat`의 주소가 들어 있습니다. `animal->speak()`는 `(*animal).speak()`와 같은 호출 방식입니다. 두 객체가 살아 있는 동안만 주소를 사용하고, 이 주소에 `delete`를 호출하지 않습니다.
+
+다형적으로 사용할 기반 클래스의 소멸자는 virtual로 선언해야 기반 클래스 포인터로 파생 객체를 삭제할 때 전체 소멸 과정이 실행됩니다.
+
+## 핵심 정리
+
+- 클래스는 속성과 메서드를 묶어 새로운 자료형을 만듭니다.
+- private와 public을 구분하면 객체의 상태를 안전하게 보호할 수 있습니다.
+- 생성자와 소멸자는 객체의 시작과 끝을 관리합니다.
+- 상속은 기존 클래스의 기능을 재사용하고 확장합니다.
+- virtual과 override를 사용하면 기반 클래스 인터페이스로 다형성을 구현할 수 있습니다.
+
+## 수업을 마치기 전 확인
+
+> [!QUIZ]
+> `private: int value;`만 두면 점수가 자동으로 0~100으로 제한되나요? 생성자는 언제 호출되나요?
+
+> [!ANSWER]
+> 아닙니다. private는 밖에서 직접 접근하는 것을 막을 뿐입니다. 생성자와 수정 메서드가 유효한 값을 유지해야 합니다. 생성자는 객체를 만들 때 자동으로 호출되어 초기 상태를 준비합니다.
+
+> [!QUIZ]
+> 기반 클래스의 가상 함수 `speak() const`를 바꾸려는데 파생 클래스에 `speak()`로 쓰고 override를 붙이면 왜 오류가 나나요?
+
+> [!ANSWER]
+> 뒤의 const까지 호출 형태에 맞아야 오버라이딩하기 때문입니다. override가 이 실수를 찾아줍니다. 매개변수만 다른 같은 이름의 함수는 오버로딩이며, 가상 함수를 바꾸는 오버라이딩과 구분합니다.
+
+**발표자 마무리:** 객체별 상태, 유효한 초기화, 가상 함수 호출을 설명할 수 있으면 [6주차](/lectures/week-06)에서 파일 분리와 예외 처리를 연결합니다.
+
+## 보충: 공통 인터페이스만 정하기
+
+아래는 여러 도형에 같은 area 호출 규칙을 주는 방법입니다. 첫 클래스 수업에서는 객체를 직접 만들 수 있는 클래스부터 충분히 연습하세요.
+
+## 추상 클래스
+
+> [!DEFINITION]
+> 구현 없이 규칙만 제공할 함수는 순수 가상 함수로 선언할 수 있습니다.
+
+~~~cpp
+class Shape {
+public:
+    virtual double area() const = 0;
+    virtual ~Shape() = default;
+};
+~~~
+
+구현되지 않은 순수 가상 함수가 남아 있는 클래스는 직접 객체를 만들 수 없는 추상 클래스입니다. 파생 클래스의 객체를 만들려면 남아 있는 순수 가상 함수를 모두 구현해야 합니다. 예를 들어 구체적인 사각형 클래스가 `area()`를 구현하도록 사용 규칙을 정하는 것입니다.
+
+
+## 시험 대비 보충: 접근 권한, 복사, 호출 순서
+
+최신 기말 대비 노트의 추가 연습입니다. 기본 클래스 수업을 마친 뒤 접근 표 → 생성·복사 → 상속 호출 → 클래스 작성 순서로 나누어 진행하세요. 문제마다 독립된 예제이며 `<iostream>`, `<string>`, `<cstring>`과 `using namespace std;`를 사용합니다. char 배열을 쓰는 Book 문제도 보존했습니다.
 
 ## 2. 접근 지정자
 
@@ -117,23 +502,16 @@ class C : public B { public: C* pc; B objB; };
 > | `objB.x` | X | X | O |
 > | `pc->y` | X | X | O |
 >
-> 모든 칸은 컴파일러로 확인한 결과입니다.
+> 접근 가능 여부는 선언 위치·접근 지정자·접근하는 객체의 자료형 순서로 판단합니다.
 
 ---
 
-## 3. 생성자와 소멸자
-
-| | 생성자 | 소멸자 |
-|---|---|---|
-| 이름 | 클래스 이름 | `~클래스이름` |
-| 반환형 | 없음 (`void`도 안 씀) | 없음 |
-| 매개변수 | 가질 수 있음, 오버로딩 가능 | **없음**, 하나만 |
-| 호출 시점 | 객체가 만들어질 때 자동 | 객체가 사라질 때 자동 |
+## 보충: 생성자 규칙과 객체 생성 순서
 
 ### 기본 생성자 규칙
 
 - 생성자를 **하나도 안 만들면** 컴파일러가 기본 생성자를 만들어 줍니다.
-- 매개변수 있는 생성자를 **하나라도 만들면** 기본 생성자는 자동으로 생기지 않습니다. 그러면 `P a;`와 `P arr[3];`은 **컴파일 오류**입니다.
+- 사용자가 생성자를 **하나라도 선언하면** 기본 생성자는 자동으로 생기지 않습니다. 그러면 `P a;`와 `P arr[3];`은 **컴파일 오류**입니다.
 
 ```cpp
 class P {
@@ -145,7 +523,7 @@ P a;          // 컴파일 오류: P() 없음
 P b(3);       // OK
 ```
 
-`P a;`를 쓰려면 `P() : x(0) {}`를 따로 선언하거나 `P(int v = 0)`처럼 기본 인자를 줍니다.
+이 예제처럼 P(int)에 기본 인수가 없을 때 `P a;`를 쓰려면 `P() : x(0) {}`를 따로 선언하거나 `P(int v = 0)`처럼 기본 인자를 줍니다.
 
 ### 멤버 초기화 목록
 
@@ -153,7 +531,7 @@ P b(3);       // OK
 class Player {
     string name;
     int hp;
-    const int id;          // const 멤버와 참조 멤버는 초기화 목록에서만 초기화 가능
+    const int id;          // 생성 시 초기화 필요. 멤버 초기화 목록 사용
 public:
     Player(string n, int h, int i) : name(n), hp(h), id(i) {}
 };
@@ -216,6 +594,13 @@ public:
 > 다음 출력을 쓰시오. (`Trace`는 생성자에서 `이름+`, 소멸자에서 `이름-`를 출력한다.)
 >
 > ```cpp
+> class Trace {
+>     string name;
+> public:
+>     Trace(string n) : name(n) { cout << name << "+ "; }
+>     ~Trace() { cout << name << "- "; }
+> };
+>
 > Trace g("g");                      // 전역
 >
 > int main() {
@@ -275,6 +660,8 @@ public:
 
 ### 얕은 복사의 문제
 
+이 Box는 복사 생성자·대입 연산자·소멸자를 함께 정의합니다. 대입은 이미 가진 저장 공간에 값을 복사하므로 자기 자신을 대입해도 안전합니다. 실제 값 저장에는 string과 vector처럼 소유권을 관리하는 멤버를 우선 사용합니다.
+
 컴파일러가 만든 기본 복사 생성자는 멤버를 **그대로 복사**합니다. 멤버가 포인터면 **주소만** 복사되어 두 객체가 같은 메모리를 공유합니다(얕은 복사). 한쪽을 바꾸면 다른 쪽도 바뀌고, 둘 다 소멸자에서 `delete`하면 **이중 해제**가 됩니다.
 
 ```cpp
@@ -283,6 +670,7 @@ public:
     int* v;
     Box(int x) { v = new int(x); }
     Box(const Box& o) { v = new int(*o.v); }   // 깊은 복사: 새 메모리에 값 복사
+    Box& operator=(const Box& o) { *v = *o.v; return *this; }
     ~Box() { delete v; }
 };
 ```
@@ -300,52 +688,12 @@ public:
 > [!ANSWER]
 > - 기본(얕은) 복사: `5 1` — `a.v`와 `b.v`가 같은 주소입니다.
 > - 깊은 복사: `1 0` — `b`는 자기 메모리를 따로 가집니다.
+>
+> 얕은 복사 실험은 공유한 메모리를 `delete a.v;`로 한 번만 해제합니다. 깊은 복사 예제는 각 객체의 소멸자가 정리하므로 직접 해제하지 않습니다.
 
 ---
 
-## 5. const 멤버 함수
-
-멤버 함수 뒤의 `const`는 "이 함수는 객체를 바꾸지 않는다"는 약속입니다. **const 객체는 const 멤버 함수만** 호출할 수 있습니다.
-
-```cpp
-class Cnt {
-    int v;
-public:
-    Cnt(int x = 0) : v(x) {}
-    int get() const { return v; }   // OK: 읽기만
-    void inc() { v++; }
-};
-const Cnt k(5);
-k.get();      // OK
-k.inc();      // 컴파일 오류
-```
-
----
-
-## 6. 상속
-
-```cpp
-class Animal {
-protected:
-    int id;
-public:
-    Animal() : id(0) { cout << "Animal() "; }
-    ~Animal() { cout << "~Animal() "; }
-    int getId() const { return id; }
-    void setId(int v) { id = v; }
-};
-
-class Mouse : public Animal {         // public 상속
-public:
-    Mouse() { cout << "Mouse() "; }   // Animal()이 먼저 자동 호출
-    ~Mouse() { cout << "~Mouse() "; }
-    void print() const { cout << "id=" << id << ' '; }   // protected라서 접근 가능
-};
-```
-
-`Mouse m; m.setId(7); m.print();` → `Animal() Mouse() id=7 ` 그리고 블록이 끝나면 `~Mouse() ~Animal()`.
-
-기반 클래스에 기본 생성자가 없으면 파생 클래스 생성자의 초기화 목록에서 **직접 호출**해야 합니다: `Dog(string n) : Animal(n) {}`.
+## 보충: 상속 종류별 접근
 
 ### 상속 종류별 접근 표
 
@@ -453,10 +801,12 @@ d.H::f();     // OK: 기반 이름을 직접 지정
 >     void showb() { cout << "derB "; }
 > };
 >
-> car* p = new rcar;
+> rcar first;
+> car* p = &first;
 > p->showa();
 > p->showb();
-> rcar* q = new rcar;
+> rcar second;
+> rcar* q = &second;
 > q->showa();
 > ```
 
@@ -470,21 +820,6 @@ d.H::f();     // OK: 기반 이름을 직접 지정
 > | `q->showa()` | rcar | rcar | — | `derA` |
 >
 > 파생에서 붙인 `virtual`은 기반 포인터로 부를 때 소용없습니다. `showb`는 기반에서 virtual이므로 파생에서 `virtual`을 안 써도 오버라이딩됩니다.
-
-### 가상 소멸자
-
-기반 포인터로 파생 객체를 `delete`하려면 기반 소멸자가 **virtual**이어야 합니다. 아니면 파생 소멸자가 불리지 않습니다(표준상 UB).
-
-```cpp
-NB* p = new ND; delete p;   // 소멸자가 virtual 아님 → 보통 "~NB"만 출력
-VB* q = new VD; delete q;   // virtual ~VB() → "~VD ~VB"
-```
-
-### 추상 클래스
-
-`virtual double area() const = 0;`처럼 `= 0`인 함수를 **순수 가상 함수**라 하고, 하나라도 있으면 **추상 클래스**입니다. 추상 클래스는 객체를 만들 수 없고(`Shape s;` 컴파일 오류), 포인터·참조로만 씁니다. 파생 클래스가 모두 구현해야 객체를 만들 수 있습니다.
-
----
 
 ## 8. 클래스 작성 문제 모범 답안 (족보형)
 
@@ -538,16 +873,3 @@ VB* q = new VD; delete q;   // virtual ~VB() → "~VD ~VB"
 > `b.price = 10;`은 private이라 컴파일 오류입니다. `float` 10.0은 `cout`에서 `10`으로 출력됩니다.
 
 ---
-
-## 핵심 정리
-
-1. `class` 기본 private, `struct` 기본 public.
-2. private은 그 클래스만, protected는 파생 클래스도(단, 자기 클래스 객체를 통할 때만), public은 어디서나.
-3. 같은 클래스의 멤버 함수는 다른 객체의 private에도 접근할 수 있다.
-4. 생성자를 하나라도 만들면 기본 생성자는 자동으로 생기지 않는다.
-5. 생성: 기반 → 멤버(선언 순서) → 자신. 소멸은 반대. 지역 객체는 생성 역순으로 소멸.
-6. `T b = a;`는 복사 생성자, `c = b;`는 대입 연산자. 값 전달도 복사 생성자.
-7. 포인터 멤버의 기본 복사는 얕은 복사다 → 깊은 복사 생성자 필요.
-8. 상속: public → 그대로, protected → public이 protected로, private → 모두 private. 생략하면 private 상속.
-9. 기반 포인터·참조로 부를 때 virtual이면 실제 객체, 아니면 포인터 자료형의 함수. virtual은 **기반에** 있어야 한다.
-10. 다형적 기반 클래스의 소멸자는 virtual로. 순수 가상 함수가 있으면 추상 클래스.

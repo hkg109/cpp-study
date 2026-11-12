@@ -1,4 +1,21 @@
-# 함수
+# 함수, 재귀, 스코프
+
+반복문으로 같은 일을 여러 번 실행했다면, 이제는 그 일에 이름을 붙여 필요할 때 호출합니다. 함수의 입력과 반환값을 먼저 이해하고, 그 다음 자기 자신을 호출하는 재귀를 살펴봅니다.
+
+## 수업 목표와 진행 순서
+
+**먼저 알아둘 것:** [1주차](/lectures/week-01)의 조건문·반복문과 변수입니다. `main`도 함수이며, 지금까지는 그 안에 모든 코드를 썼습니다.
+
+- 인수 → 매개변수 → 계산 → 반환값의 흐름을 따라갑니다.
+- 값 전달에서 원본이 바뀌지 않는 이유를 설명합니다.
+- 재귀의 종료 조건과 호출별 지역 변수를 구분합니다.
+
+**권장 60분:** 함수 만들기와 호출 20분 → 값 전달·지역 변수 10분 → 선언·재귀 추적 15분 → 함께 풀기·확인 15분. `static`, `extern`, 라이브러리와 네임스페이스는 보충입니다.
+
+> [!EXAMPLE]
+> **발표 시작 질문:** ‘두 수 중 큰 값 구하기’를 세 번 사용한다면 비교문을 세 번 복사해야 할까요? 먼저 첫 예제를 실행하고, 호출의 숫자를 바꿔 같은 함수가 다시 쓰이는지 확인하세요. 각 전체 프로그램은 별도 파일로 실행하고, 나머지는 코드 조각으로 읽습니다.
+
+함수 **정의**는 `main` 밖에, 함수를 **호출하는 문장**은 `main` 등 다른 함수 안에 둡니다. `#include`는 파일 맨 위에 둡니다. 코드 조각을 합칠 때 같은 이름의 함수 정의를 여러 개 붙이지 마세요.
 
 ## 함수가 필요한 이유
 
@@ -219,7 +236,10 @@ value는 여전히 10
 
 ```cpp
 int maxValue(int first, int second) {
-    int result;
+    int result = first;
+    if (second > result) {
+        result = second;
+    }
     return result;
 }
 ```
@@ -266,6 +286,8 @@ int result = square(4);
 
 `square(4)`의 반환값 `16`이 `result`에 저장된다.
 
+**반환과 출력은 다릅니다.** `return`은 호출한 코드에 값을 전달하고, `cout`은 화면에 보여 줍니다. `square(4);`만 실행하면 16을 계산해도 화면에는 아무것도 나오지 않습니다. 반환값을 저장하거나 `cout << square(4);`로 출력해야 합니다.
+
 반환값의 자료형은 함수의 반환형과 호환되어야 한다.
 
 ```cpp
@@ -282,6 +304,7 @@ int getNumber() {
 
 ```cpp
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -388,6 +411,8 @@ int add(int first, int second);
 
 팩토리얼은 다음과 같이 정의한다.
 
+이번 예제의 입력 범위는 **0~20인 정수**로 제한합니다. 0의 팩토리얼은 1로 정합니다. 더 큰 값은 `long long`의 범위를 넘을 수 있고, 음수는 이 예제의 계산 대상이 아닙니다.
+
 ```text
 n! = n × (n - 1) × ... × 2 × 1
 0! = 1
@@ -439,6 +464,14 @@ factorial(3) → 3 × 2 = 6 반환
 factorial(4) → 4 × 6 = 24 반환
 ```
 
+**여기서 잠깐:** `factorial(3)`을 기다리는 동안 `factorial(4)`의 `number`가 3으로 바뀌는 것은 아닙니다. 호출마다 `number`가 따로 있습니다. 바깥 호출은 자신의 4를 기억한 채 안쪽의 답을 기다립니다. 호출이 끝나면 기다리던 곱셈을 이어갑니다.
+
+> [!QUIZ]
+> 기저 조건이 있는데도 재귀 호출을 `factorial(number + 1)`로 바꾸면 왜 끝나지 않나요?
+
+> [!ANSWER]
+> 4에서 시작하면 5, 6으로 커져 `number <= 1`에 가까워지지 않습니다. 종료 조건과 그 조건으로 향하는 입력 변화가 함께 필요합니다. 실제로 실행해 스택을 소모하지 말고 값의 변화로 판단하세요.
+
 ### 재귀 함수 설계 원칙
 
 - 기저 조건을 반드시 작성한다.
@@ -472,54 +505,6 @@ long long factorial(int number) {
 | 함수가 자기 자신을 호출한다. | 하나의 함수 안에서 반복한다. |
 | 문제 구조를 직관적으로 표현할 수 있다. | 호출에 필요한 추가 메모리가 적다. |
 | 호출이 너무 깊으면 스택이 부족해질 수 있다. | 단순 반복 문제에서 일반적으로 효율적이다. |
-
----
-
-## 상호 재귀
-
-두 개 이상의 함수가 서로를 호출하는 형태를 상호 재귀(Mutual Recursion)라고 한다.
-
-```text
-chicken() → egg() → chicken() → ...
-```
-
-서로를 호출하는 함수는 상대 함수의 정보를 호출 전에 알아야 하므로 함수 원형이 필요하다.
-
-```cpp
-#include <iostream>
-#include <string>
-
-using namespace std;
-
-string chicken(int generation);
-string egg(int generation);
-
-string chicken(int generation) {
-    if (generation == 0) {
-        return "Chicken!";
-    }
-
-    return egg(generation - 1);
-}
-
-string egg(int generation) {
-    if (generation == 0) {
-        return "Egg!";
-    }
-
-    return chicken(generation - 1);
-}
-
-int main() {
-    int generation;
-
-    cout << "시작 세대를 입력하세요: ";
-    cin >> generation;
-    cout << chicken(generation) << '\n';
-
-    return 0;
-}
-```
 
 ---
 
@@ -652,6 +637,178 @@ int add(int a, int b);
 | 저장 기간 | 이 변수가 언제 생성되고 언제 사라지는가? |
 
 일반적인 지역 변수는 함수나 블록에 들어올 때 생성되고 빠져나갈 때 사라진다. 전역 변수는 프로그램 실행 동안 존재한다.
+
+더 정확히는 일반 지역 변수의 초기화가 있는 선언을 실행할 때 객체가 만들어집니다. 블록 안에 같은 이름을 다시 선언하면 바깥 이름을 가립니다. **이름을 어디서 찾는가**와 **값이 언제까지 남는가**를 다른 질문으로 보세요.
+
+---
+
+# 자주 하는 실수
+
+## 함수 정의 전에 선언하지 않고 호출
+
+```cpp
+int main() {
+    cout << add(2, 3); // add의 선언이 위에 없다면 오류
+}
+```
+
+해결 방법: 함수 정의를 위로 옮기거나 함수 원형을 먼저 작성한다.
+
+```cpp
+int add(int a, int b);
+```
+
+## 반환형과 반환값이 맞지 않음
+
+```cpp
+int printMessage() {
+    cout << "Hello\n";
+    // int 반환형이지만 반환값이 없음
+}
+```
+
+값을 반환하지 않는 함수라면 `void`를 사용한다.
+
+```cpp
+void printMessage() {
+    cout << "Hello\n";
+}
+```
+
+## 값 전달인데 원본이 바뀔 것으로 예상
+
+```cpp
+void change(int number) {
+    number = 100;
+}
+```
+
+일반 매개변수에는 값이 복사되므로 호출한 쪽의 원본 변수는 바뀌지 않는다.
+
+## 재귀 함수에 기저 조건이 없음
+
+```cpp
+int countdown(int number) {
+    return countdown(number - 1);
+}
+```
+
+호출을 멈출 조건이 없으므로 정상적으로 종료할 수 없다.
+
+## 블록 밖에서 지역 변수를 사용
+
+```cpp
+{
+    int value = 10;
+}
+
+// cout << value; // 오류
+```
+
+## `const` 변수의 값을 변경
+
+```cpp
+const int limit = 100;
+// limit = 200; // 오류
+```
+
+---
+
+## 함께 풀기: 합계를 계산해서 반환하는 함수
+
+`sumTo(3)`은 `1 + 2 + 3`인 6, `sumTo(0)`은 0을 반환하게 만드세요. 입력 범위는 0~1000입니다. 함수 안에서 출력하지 않고, `main`이 반환값을 출력하도록 역할을 나눕니다.
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int sumTo(int last) {
+    int sum = 0;
+    for (int i = 1; i <= last; i++) {
+        sum += i;
+    }
+    return sum;
+}
+
+int main() {
+    cout << sumTo(3) << '\n';
+    cout << sumTo(0) << '\n';
+    return 0;
+}
+```
+
+출력은 순서대로 6과 0입니다. `sumTo(3)`이 끝난 뒤 `sumTo(0)`을 부르면 `sum`은 다시 0으로 시작합니다. 일반 지역 변수는 이전 호출의 합계를 보관하지 않습니다.
+
+**발표 순서:** 먼저 함수 이름·입력·출력을 말로 정하고 → 반복문으로 구현하고 → `sumTo(3)`의 `sum`을 추적하고 → `return`한 값이 `cout`에 전달되는 위치를 짚습니다.
+
+## 수업을 마치기 전 확인
+
+> [!QUIZ]
+> `void change(int value) { value = 100; }`를 `int score = 10;`에 대해 `change(score);`로 호출하면 score는 얼마인가요? 함수가 만든 100을 호출자가 쓰려면 어떻게 설계할 수 있나요?
+
+> [!ANSWER]
+> score는 10입니다. 매개변수는 복사본입니다. 예를 들어 `int change(int value)`가 새 값을 반환하고 호출자가 `score = change(score);`로 저장할 수 있습니다. 다음 주에는 참조로 원본을 바꾸는 방법을 배웁니다.
+
+> [!QUIZ]
+> `factorial(3)`에서 곱셈 3 × 2 × 1이 완성되기 전에 가장 먼저 답을 반환하는 호출은 무엇인가요?
+
+> [!ANSWER]
+> `factorial(1)`이 1을 반환합니다. 그 다음 기다리던 `factorial(2)`가 2, `factorial(3)`이 6을 반환합니다. 호출할 때 내려가는 과정과 반환할 때 돌아오는 과정을 나눠 보세요.
+
+**핵심:** 함수는 입력을 받고 결과를 돌려줍니다. 호출마다 지역 변수가 따로 있고, 재귀도 같은 호출 규칙을 따릅니다. [Exercise 04](/lectures/week-00-04)는 함수와 재귀를 익힌 뒤 푸는 심화 문제입니다. 기본 예제가 익숙해지면 [3주차](/lectures/week-03)로 넘어가세요.
+
+## 보충: 호출이 익숙해진 뒤 읽기
+
+아래 내용은 필요한 항목을 골라 복습하세요. 상호 재귀는 두 함수의 호출을 번갈아 추적하는 추가 예제입니다. `extern`의 여러 파일 연결은 6주차 파일 분리와 함께 다시 봅니다.
+
+## 상호 재귀
+
+두 개 이상의 함수가 서로를 호출하는 형태를 상호 재귀(Mutual Recursion)라고 한다.
+
+```text
+chicken() → egg() → chicken() → ...
+```
+
+서로를 호출하는 함수는 상대 함수의 정보를 호출 전에 알아야 하므로 함수 원형이 필요하다.
+
+```cpp
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+string chicken(int generation);
+string egg(int generation);
+
+string chicken(int generation) {
+    if (generation == 0) {
+        return "Chicken!";
+    }
+
+    return egg(generation - 1);
+}
+
+string egg(int generation) {
+    if (generation == 0) {
+        return "Egg!";
+    }
+
+    return chicken(generation - 1);
+}
+
+int main() {
+    int generation;
+
+    cout << "시작 세대를 입력하세요: ";
+    if (!(cin >> generation) || generation < 0 || generation > 20) {
+        cout << "0부터 20까지 입력하세요.\n";
+        return 1;
+    }
+    cout << chicken(generation) << '\n';
+
+    return 0;
+}
+```
 
 ---
 
@@ -911,89 +1068,3 @@ int main() {
 - 컴파일러의 최적화에 도움이 될 수 있다.
 
 ---
-
-# 자주 하는 실수
-
-## 함수 정의 전에 선언하지 않고 호출
-
-```cpp
-int main() {
-    cout << add(2, 3); // add의 선언이 위에 없다면 오류
-}
-```
-
-해결 방법: 함수 정의를 위로 옮기거나 함수 원형을 먼저 작성한다.
-
-```cpp
-int add(int a, int b);
-```
-
-## 반환형과 반환값이 맞지 않음
-
-```cpp
-int printMessage() {
-    cout << "Hello\n";
-    // int 반환형이지만 반환값이 없음
-}
-```
-
-값을 반환하지 않는 함수라면 `void`를 사용한다.
-
-```cpp
-void printMessage() {
-    cout << "Hello\n";
-}
-```
-
-## 값 전달인데 원본이 바뀔 것으로 예상
-
-```cpp
-void change(int number) {
-    number = 100;
-}
-```
-
-일반 매개변수에는 값이 복사되므로 호출한 쪽의 원본 변수는 바뀌지 않는다.
-
-## 재귀 함수에 기저 조건이 없음
-
-```cpp
-int countdown(int number) {
-    return countdown(number - 1);
-}
-```
-
-호출을 멈출 조건이 없으므로 정상적으로 종료할 수 없다.
-
-## 블록 밖에서 지역 변수를 사용
-
-```cpp
-{
-    int value = 10;
-}
-
-// cout << value; // 오류
-```
-
-## `const` 변수의 값을 변경
-
-```cpp
-const int limit = 100;
-// limit = 200; // 오류
-```
-
----
-
-# 최종 정리
-
-- 함수는 **반환형, 이름, 매개변수, 함수 본문**으로 구성된다.
-- 호출 시 전달한 인수는 일반 매개변수에 복사되며, 이를 값에 의한 전달이라고 한다.
-- `void`는 반환값이 없는 함수를 나타내고 `return`은 함수 실행을 종료한다.
-- 함수 원형은 함수의 이름, 반환형, 매개변수 자료형을 컴파일러에 미리 알린다.
-- 재귀 함수에는 반드시 기저 조건과 문제를 더 작게 만드는 재귀 단계가 있어야 한다.
-- 스코프는 이름을 사용할 수 있는 범위이고, 저장 기간은 변수가 메모리에 존재하는 기간이다.
-- `static` 지역 변수는 함수 호출이 끝나도 값을 유지한다.
-- 표준 라이브러리는 헤더를 포함하여 사용하며 수학 함수에는 `<cmath>`를 사용한다.
-- 네임스페이스는 같은 이름의 충돌을 방지하고 `std`는 표준 라이브러리의 네임스페이스이다.
-- `const`는 초기화 후 변경할 수 없는 값을 선언할 때 사용한다.
-
